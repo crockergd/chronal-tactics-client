@@ -1,4 +1,4 @@
-import { BaseEntity } from 'tbcf';
+import { BaseEntity } from 'turn-based-combat-framework';
 import Position from '../utils/position';
 
 export default class Entity extends BaseEntity {

@@ -1,5 +1,5 @@
 import AbstractScene from '../phaser/abstractscene';
-import { Battle, TickMode } from 'tbcf';
+import { Battle, TickMode } from 'turn-based-combat-framework';
 import Entity from '../entities/entity';
 import Stage from '../entities/stage';
 import Position from '../utils/position';
@@ -7,10 +7,6 @@ import Position from '../utils/position';
 export default class Combat extends AbstractScene {
     private battle: Battle;
     private stage: Stage;
-
-    public init(data: any) {
-        this.scene_context = data.scene_context;
-    }
 
     public create(): void {
         this.battle = new Battle(TickMode.SYNC);
