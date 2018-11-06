@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "lib": [
+            "dom",
+            "es2017"
+        ],
+        "sourceMap": true,
+        "outDir": "./www",
+        "strict": true,
+        "strictNullChecks": false,
+        "strictFunctionTypes": false,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true
+    },
+    "files": [
+        "./vendor/phaser.d.ts"
+    ],
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "**/*.spec.ts"
+    ]
+}
