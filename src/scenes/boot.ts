@@ -1,6 +1,5 @@
-import SceneContext from '../contexts/scenecontext';
-import AbstractScene from '../phaser/abstractscene';
-import { AbstractText } from '../phaser/abstracttext';
+import AbstractScene from '../abstracts/abstractscene';
+import AbstractText from '../abstracts/abstracttext';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -34,7 +33,11 @@ export default class Boot extends AbstractScene {
     }
 
     private load_assets(): void {
-        let require_tilesheet: __WebpackModuleApi.RequireContext = require.context('../../assets/tilesheets/', true);
+        const require_image: __WebpackModuleApi.RequireContext = require.context('../../assets/images/', true);
+        const require_tilesheet: __WebpackModuleApi.RequireContext = require.context('../../assets/tilesheets/', true);
+
+        this.load.image('dirt', require_image('./dirt.png'));
+        this.load.image('tile', require_image('./tile.png'));
 
         this.load.spritesheet('bandit', require_tilesheet('./bandit.png'), { frameWidth: 110, frameHeight: 110 });
     }

@@ -1,4 +1,4 @@
-import { AbstractGame } from './phaser/abstractgame';
+import AbstractGame from './abstracts/abstractgame';
 
 window.addEventListener('DOMContentLoaded', () => {
     let width: number = screen.width;

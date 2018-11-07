@@ -1,7 +1,8 @@
 import { GameObjects, Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
+import AbstractContainer from './abstractcontainer';
 
-export class AbstractText {
+export default class AbstractText {
     private renderer: RenderContext;
     public framework_object: GameObjects.Text;
 
@@ -13,14 +14,14 @@ export class AbstractText {
         strokeThickness: 2
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string) {
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         // this.framework_object.lineSpacing = -4;
 
-        // if (group) {
-        //     group.add(this);
-        // }
+        if (container) {
+            container.add(this);
+        }
     }
 
     get x(): number {

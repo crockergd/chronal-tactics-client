@@ -1,5 +1,5 @@
 import RenderContext from './rendercontext';
-import AbstractScene from '../phaser/abstractscene';
+import AbstractScene from '../abstracts/abstractscene';
 
 export default class SceneContext {
     private readonly render_context: RenderContext;

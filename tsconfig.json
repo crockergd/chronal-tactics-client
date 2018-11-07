@@ -4,11 +4,12 @@
         "module": "commonjs",
         "lib": [
             "dom",
-            "es2017"
+            "es2017",
+            "scripthost"
         ],
         "sourceMap": true,
         "outDir": "./www",
-        "strict": true,
+        "strict": true,        
         "strictNullChecks": false,
         "strictFunctionTypes": false,
         "strictPropertyInitialization": false,

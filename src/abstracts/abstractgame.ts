@@ -1,9 +1,9 @@
 import Boot from '../scenes/boot';
 import Combat from '../scenes/combat';
-import { Game, Scene } from 'phaser';
+import { Game } from 'phaser';
 import SceneContext from '../contexts/scenecontext';
 
-export class AbstractGame extends Game {
+export default class AbstractGame extends Game {
     constructor(config: GameConfig) {
         super(config);
 
