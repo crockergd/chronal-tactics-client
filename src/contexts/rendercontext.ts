@@ -25,15 +25,18 @@ export default class RenderContext {
     }
 
     public render(stage: Stage): void {
-
+        stage.remaining_text.text = stage.turn_remaining.toFixed(2);
     }
 
-    public render_entities(stage: Stage): void {
+    public initiate_battle(stage: Stage): void {
         for (const entity of stage.entities) {
             entity.renderable.sprite = this.add_sprite(0, 0, entity.renderable.sprite_key);
             entity.renderable.sprite.set_anchor(0.5, 1.0);
+            entity.renderable.sprite.framework_object.setInteractive();
             entity.renderable.dirty = true;
         }
+
+        stage.remaining_text = this.add_text(10, 10, '');
     }
 
     public add_container(x: number, y: number): AbstractContainer {

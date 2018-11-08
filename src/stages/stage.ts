@@ -1,18 +1,22 @@
 import Cell from './cell';
 import AbstractContainer from '../abstracts/abstractcontainer';
 import Entity from '../entities/entity';
+import AbstractText from '../abstracts/abstracttext';
 
 export default class Stage {
     public width: number;
     public height: number;
     public depth: number;
 
+    public turn_remaining: number;
     public tile_width: number;
     public tile_height: number;
 
     public container: AbstractContainer;
     public grid: Cell[][];
     public entities: Entity[];
+
+    public remaining_text: AbstractText;
 
     constructor(width: number, height: number, depth: number) {
         this.width = width;
