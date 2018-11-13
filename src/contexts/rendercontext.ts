@@ -6,6 +6,7 @@ import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
 import Entity from '../entities/entity';
+import { Turn } from 'turn-based-combat-framework';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -28,6 +29,10 @@ export default class RenderContext {
         stage.remaining_text.text = stage.turn_remaining.toFixed(2);
     }
 
+    public post_tick(stage: Stage, turn: Turn): void {
+        
+    }
+
     public initiate_battle(stage: Stage): void {
         for (const entity of stage.entities) {
             entity.renderable.sprite = this.add_sprite(0, 0, entity.renderable.sprite_key);
@@ -37,6 +42,7 @@ export default class RenderContext {
         }
 
         stage.remaining_text = this.add_text(10, 10, '');
+        stage.remaining_text.framework_object.setScrollFactor(0);
     }
 
     public add_container(x: number, y: number): AbstractContainer {

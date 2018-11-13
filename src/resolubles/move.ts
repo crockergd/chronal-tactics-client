@@ -4,6 +4,8 @@ import Entity from '../entities/entity';
 export default class Move extends Resoluble {
     constructor(readonly source: Entity) {
         super();
+
+        this.type = 'Move';
     }
 
     public resolve(): void {

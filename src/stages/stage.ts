@@ -2,6 +2,7 @@ import Cell from './cell';
 import AbstractContainer from '../abstracts/abstractcontainer';
 import Entity from '../entities/entity';
 import AbstractText from '../abstracts/abstracttext';
+import Vector from '../utils/vector';
 
 export default class Stage {
     public width: number;
@@ -35,5 +36,13 @@ export default class Stage {
 
     public add_entity(entity: Entity): void {
         this.entities.push(entity);
+    }
+
+    public get_entity_by_position(position: Vector): Entity {
+        for (const entity of this.entities) {
+            if (entity.spatial.position.x === position.x && entity.spatial.position.y === position.y && entity.spatial.position.z === position.z) return entity;
+        }
+
+        return null;
     }
 }

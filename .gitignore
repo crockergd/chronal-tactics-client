@@ -5,3 +5,5 @@ www
 platforms
 plugins
 dist
+*.log
+.env
