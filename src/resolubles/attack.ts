@@ -1,5 +1,4 @@
-import { Resoluble } from 'turn-based-combat-framework';
-import Entity from '../entities/entity';
+import { Resoluble, Entity } from 'turn-based-combat-framework';
 import Stage from '../stages/stage';
 import Vector from '../utils/vector';
 
@@ -28,7 +27,7 @@ export default class Attack extends Resoluble {
             horizontal = false;
         }
 
-        if (this.source.renderable.sprite_key === 'bandit') {
+        if (this.source.identifier.class_key === 'bandit') {
             let second_position: Vector;
             let third_position: Vector;
 
@@ -44,7 +43,7 @@ export default class Attack extends Resoluble {
             this.targetted_positions.push(second_position);
             this.targetted_positions.push(third_position);
 
-        } else if (this.source.renderable.sprite_key === 'spearman') {
+        } else if (this.source.identifier.class_key === 'spearman') {
             let second_position: Vector;
 
             if (horizontal) {
@@ -69,7 +68,7 @@ export default class Attack extends Resoluble {
         //     console.log(entity);
         // }
 
-        this.source.renderable.dirty = true;
+        this.source.set('dirty', true);
     }
 
     public undo(): void {

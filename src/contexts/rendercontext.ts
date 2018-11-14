@@ -5,8 +5,7 @@ import AbstractContainer from '../abstracts/abstractcontainer';
 import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
-import Entity from '../entities/entity';
-import { Turn } from 'turn-based-combat-framework';
+import { Turn, Entity } from 'turn-based-combat-framework';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -17,16 +16,16 @@ export default class RenderContext {
 
     public update(stage: Stage): void {
         for (const entity of stage.entities) {
-            if (entity.renderable.dirty) {
+            if (entity.get('dirty') as boolean) {
                 const position: Vector = this.local_to_world(entity, stage);
-                entity.renderable.sprite.set_position(position.x, position.y);
-                entity.renderable.dirty = false;
+                entity.get('sprite').set_position(position.x, position.y);
+                entity.set('dirty', false);
             }
         }
     }
 
     public render(stage: Stage): void {
-        stage.remaining_text.text = stage.turn_remaining.toFixed(2);
+        // stage.remaining_text.text = stage.turn_remaining.toFixed(2);
     }
 
     public post_tick(stage: Stage, turn: Turn): void {
@@ -35,10 +34,10 @@ export default class RenderContext {
 
     public initiate_battle(stage: Stage): void {
         for (const entity of stage.entities) {
-            entity.renderable.sprite = this.add_sprite(0, 0, entity.renderable.sprite_key);
-            entity.renderable.sprite.set_anchor(0.5, 1.0);
-            entity.renderable.sprite.framework_object.setInteractive();
-            entity.renderable.dirty = true;
+            entity.set('sprite', this.add_sprite(0, 0, entity.identifier.class_key), false);
+            entity.get('sprite').set_anchor(0.5, 1.0);
+            entity.get('sprite').framework_object.setInteractive();
+            entity.set('dirty', true);
         }
 
         stage.remaining_text = this.add_text(10, 10, '');

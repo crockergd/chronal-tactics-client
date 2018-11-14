@@ -1,57 +1,37 @@
-import { Battle, TickMode, Turn } from 'turn-based-combat-framework';
-import Entity from '../entities/entity';
+import { Turn, Entity } from 'turn-based-combat-framework';
 import Stage from '../stages/stage';
 import Vector from '../utils/vector';
 import AbstractScene from '../abstracts/abstractscene';
-import Move from '../resolubles/move';
-import Team from '../entities/team';
 import Attack from '../resolubles/attack';
 
-// get tbcf working a little bit, enough to add a custom resoluble to move entities
-
 export default class Combat extends AbstractScene {
-    private battle: Battle;
     private stage: Stage;
-    private turn_time: number;
+    private team: number;
 
     private movement_entity: Entity;
     private movement_x: number;
     private movement_y: number;
 
     public create(): void {
-        this.battle = new Battle(TickMode.SYNC);
-        this.stage = new Stage(5, 5, 1);
+        this.socket.on('room-closed', () => {
+            console.log('Session closed.');
+        });
 
-        // const bandit_a: Entity = new Entity('bandit', Team.PLAYERS, new Vector(0, 1, 0));
-        const bandit_b: Entity = new Entity('bandit', Team.PLAYERS, new Vector(0, 3, 0));
-        const spear_a: Entity = new Entity('spearman', Team.PLAYERS, new Vector(0, 1, 0));
-        // const spear_b: Entity = new Entity('spearman', Team.PLAYERS, new Vector(0, 4, 0));
-
-        const enemy: Entity = new Entity('bandit', Team.ENEMIES, new Vector(3, 2, 0));
-
-        // this.stage.add_entity(bandit_a);
-        this.stage.add_entity(bandit_b);
-        this.stage.add_entity(spear_a);
-        // this.stage.add_entity(spear_b);
-        this.stage.add_entity(enemy);
-
-        for (const entity of this.stage.entities) {
-            this.battle.add_entity(entity);
-        }
+        this.team = this.combat_data.team;
+        this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
 
         this.render_stage();
         this.scene_context.renderer.initiate_battle(this.stage);
-        // this.render_entities();
 
-        this.battle.register_pre_tick_callback(this.on_pre_tick, this);
-        this.battle.register_post_tick_callback(this.on_post_tick, this);
-        this.battle.register_resoluble(Move);
+        // this.battle.register_pre_tick_callback(this.on_pre_tick, this);
+        // this.battle.register_post_tick_callback(this.on_post_tick, this);
+        // this.battle.register_resoluble(Move);
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             for (const entity of this.stage.entities) {
-                if (entity.identifier.team !== Team.PLAYERS) continue;
+                if (entity.identifier.team !== this.team) continue;
 
-                if (this.game.input.hitTest(pointer, [entity.renderable.sprite.framework_object], this.cameras.main).length) {
+                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.cameras.main).length) {
                     this.movement_entity = entity;
 
                     this.movement_x = pointer.x;
@@ -60,9 +40,6 @@ export default class Combat extends AbstractScene {
                     return;
                 }
             }
-
-            // player.spatial.position.y++;
-            // player.renderable.dirty = true;
         }, this);
 
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
@@ -84,11 +61,9 @@ export default class Combat extends AbstractScene {
 
             if (!this.movement_entity.spatial.has_moved) {
                 // this.battle.add_delayed_resoluble(new Move(this.movement_entity));
-                this.battle.call_resoluble('Move', true, this.movement_entity);
+                // this.battle.call_resoluble('Move', true, this.movement_entity);
                 this.movement_entity.spatial.has_moved = true;
             }
-
-            // this.battle.add_delayed_resoluble(null);
 
             this.movement_entity = null;
         }, this);
@@ -96,8 +71,6 @@ export default class Combat extends AbstractScene {
 
     public update(time: number, dt_ms: number): void {
         const dt: number = dt_ms / 1000;
-        this.battle.update(dt);
-        this.stage.turn_remaining = this.battle.turn_remaining;
         this.scene_context.renderer.update(this.stage);
         this.scene_context.renderer.render(this.stage);
     }
@@ -106,7 +79,7 @@ export default class Combat extends AbstractScene {
         // console.log('fweawe');
 
         for (const entity of this.stage.entities) {
-            this.battle.add_delayed_resoluble(new Attack(entity, this.stage));
+            this.stage.battle.add_delayed_resoluble(new Attack(entity, this.stage));
 
             entity.spatial.has_moved = false;
         }

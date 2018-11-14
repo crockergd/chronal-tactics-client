@@ -1,5 +1,4 @@
-import { Resoluble } from 'turn-based-combat-framework';
-import Entity from '../entities/entity';
+import { Resoluble, Entity } from 'turn-based-combat-framework';
 
 export default class Move extends Resoluble {
     constructor(readonly source: Entity) {
@@ -19,7 +18,7 @@ export default class Move extends Resoluble {
             this.source.spatial.position.y--;
         }
 
-        this.source.renderable.dirty = true;
+        this.source.set('dirty', true);
     }
 
     public undo(): void {

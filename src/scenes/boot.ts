@@ -1,5 +1,6 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
+import Sio from 'socket.io-client';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -18,16 +19,31 @@ export default class Boot extends AbstractScene {
         });
 
         this.load.on('complete', () => {
-            this.subtitle.text = 'Click to Start';
+            this.subtitle.text = 'Click to Connect';
         });
 
         this.load_assets();
     }
 
     public create(): void {
-        this.input.on('pointerup', () => {
-            this.scene.start('combat', {
-                scene_context: this.scene_context
+        this.input.once('pointerup', () => {
+            this.subtitle.text = 'Connecting...';
+
+            const socket: SocketIOClient.Socket = Sio('http://localhost:3010');
+            socket.on('connect', () => {
+                this.subtitle.text = 'Matchmaking...';
+
+                socket.emit('init', {
+                    name: 'George',
+                    units: ['bandit', 'bandit', 'spearman', 'spearman']
+                });
+            });
+            socket.on('matched', (payload: any) => {
+                this.scene.start('combat', {
+                    scene_context: this.scene_context,
+                    socket: socket,
+                    combat_data: payload
+                });
             });
         });
     }

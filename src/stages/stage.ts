@@ -1,10 +1,11 @@
 import Cell from './cell';
 import AbstractContainer from '../abstracts/abstractcontainer';
-import Entity from '../entities/entity';
 import AbstractText from '../abstracts/abstracttext';
 import Vector from '../utils/vector';
+import { Battle, TickMode, Entity } from 'turn-based-combat-framework';
 
 export default class Stage {
+    public battle: Battle;
     public width: number;
     public height: number;
     public depth: number;
@@ -15,16 +16,20 @@ export default class Stage {
 
     public container: AbstractContainer;
     public grid: Cell[][];
-    public entities: Entity[];
 
     public remaining_text: AbstractText;
 
+    public get entities(): Entity[] {
+        return this.battle.get_entities();
+    }
+
     constructor(width: number, height: number, depth: number) {
+        this.battle = new Battle(TickMode.SYNC);
+
         this.width = width;
         this.height = height;
         this.depth = depth;
         this.grid = [];
-        this.entities = [];
 
         for (let i: number = 0; i < this.width; i++) {
             this.grid[i] = [];
@@ -34,15 +39,30 @@ export default class Stage {
         }
     }
 
-    public add_entity(entity: Entity): void {
-        this.entities.push(entity);
-    }
-
     public get_entity_by_position(position: Vector): Entity {
         for (const entity of this.entities) {
             if (entity.spatial.position.x === position.x && entity.spatial.position.y === position.y && entity.spatial.position.z === position.z) return entity;
         }
 
         return null;
+    }
+    
+    public toJSON(): any {
+        const json: any = {
+            battle: this.battle,
+            width: this.width,
+            height: this.height,
+            depth: this.depth,
+        };
+
+        return json;
+    }
+
+    public static fromJSON(json: any): Stage {
+        const obj: Stage = new Stage(json.width, json.height, json.depth);
+
+        obj.battle = Battle.fromJSON(json.battle);        
+
+        return obj;
     }
 }
