@@ -35,7 +35,7 @@ export default class Boot extends AbstractScene {
 
                 socket.emit('init', {
                     name: 'George',
-                    units: ['bandit', 'bandit', 'spearman', 'spearman']
+                    units: ['spearman']
                 });
             });
             socket.on('matched', (payload: any) => {

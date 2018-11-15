@@ -9,12 +9,8 @@ export default class Stage {
     public width: number;
     public height: number;
     public depth: number;
-
     public turn_remaining: number;
-    public tile_width: number;
-    public tile_height: number;
 
-    public container: AbstractContainer;
     public grid: Cell[][];
 
     public remaining_text: AbstractText;

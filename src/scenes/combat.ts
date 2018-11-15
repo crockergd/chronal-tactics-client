@@ -2,7 +2,6 @@ import { Turn, Entity } from 'turn-based-combat-framework';
 import Stage from '../stages/stage';
 import Vector from '../utils/vector';
 import AbstractScene from '../abstracts/abstractscene';
-import Attack from '../resolubles/attack';
 
 export default class Combat extends AbstractScene {
     private stage: Stage;
@@ -23,8 +22,15 @@ export default class Combat extends AbstractScene {
         this.render_stage();
         this.scene_context.renderer.initiate_battle(this.stage);
 
+        this.socket.on('post-tick', (data: any) => {
+            const turn_json: any = data.turn;
+            this.stage.battle.deserialize_turn(turn_json);
+
+            this.scene_context.renderer.render_turn(this.stage.battle.get_last_turn());
+        });
+
         // this.battle.register_pre_tick_callback(this.on_pre_tick, this);
-        // this.battle.register_post_tick_callback(this.on_post_tick, this);
+        this.stage.battle.register_post_tick_callback(this.on_post_tick, this);
         // this.battle.register_resoluble(Move);
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -47,21 +53,27 @@ export default class Combat extends AbstractScene {
             if (Math.abs(pointer.x - this.movement_x) < 30) return;
             if (Math.abs(pointer.y - this.movement_y) < 30) return;
 
+            const facing: Vector = new Vector(0, 0);
+
             if (pointer.x > this.movement_x) {
-                this.movement_entity.spatial.facing.x = 1;
+                facing.x = 1;
             } else {
-                this.movement_entity.spatial.facing.x = -1;
+                facing.x = -1;
             }
 
             if (pointer.y > this.movement_y) {
-                this.movement_entity.spatial.facing.y = 1;
+                facing.y = 1;
             } else {
-                this.movement_entity.spatial.facing.y = -1;
+                facing.y = -1;
             }
 
             if (!this.movement_entity.spatial.has_moved) {
                 // this.battle.add_delayed_resoluble(new Move(this.movement_entity));
                 // this.battle.call_resoluble('Move', true, this.movement_entity);
+
+                this.fire_resoluble('Face', this.movement_entity, facing);
+                this.fire_resoluble('Move', this.movement_entity);
+
                 this.movement_entity.spatial.has_moved = true;
             }
 
@@ -75,34 +87,45 @@ export default class Combat extends AbstractScene {
         this.scene_context.renderer.render(this.stage);
     }
 
+    public fire_resoluble(key: string, ...args: any[]): void {
+        const resoluble: any = this.stage.battle.serialize_resoluble(key, ...args);
+        this.socket.emit('resoluble', {
+            resoluble: resoluble
+        })
+    }
+
     public on_pre_tick(): void {
         // console.log('fweawe');
 
         for (const entity of this.stage.entities) {
-            this.stage.battle.add_delayed_resoluble(new Attack(entity, this.stage));
+            // this.stage.battle.add_delayed_resoluble(new Attack(entity, this.stage));
 
             entity.spatial.has_moved = false;
         }
     }
 
     public on_post_tick(turn: Turn): void {
+        for (const entity of this.stage.entities) {
+            entity.spatial.has_moved = false;
+        }
+
         this.scene_context.renderer.post_tick(this.stage, turn);
     }
 
     public render_stage(): void {
-        this.stage.container = this.scene_context.renderer.add_container(this.cameras.main.centerX, this.cameras.main.centerY);
+        this.scene_context.renderer.container = this.scene_context.renderer.add_container(this.cameras.main.centerX, this.cameras.main.centerY);
 
         const tile_dimensions: Vector = this.scene_context.renderer.get_sprite_dimensions('dirt');
-        this.stage.tile_width = tile_dimensions.x / 2.0;
-        this.stage.tile_height = (tile_dimensions.y / 2.0) - 5;
+        this.scene_context.renderer.tile_width = tile_dimensions.x / 2.0;
+        this.scene_context.renderer.tile_height = (tile_dimensions.y / 2.0) - 5;
 
         for (let i: number = this.stage.width - 1; i >= 0; i--) {
             for (let j: number = 0; j < this.stage.height; j++) {
-                this.stage.grid[i][j].sprite = this.scene_context.renderer.add_sprite(i * this.stage.tile_width + (j * this.stage.tile_width), (j * this.stage.tile_height) - (i * this.stage.tile_height), 'dirt', this.stage.container);
+                this.stage.grid[i][j].sprite = this.scene_context.renderer.add_sprite(i * this.scene_context.renderer.tile_width + (j * this.scene_context.renderer.tile_width), (j * this.scene_context.renderer.tile_height) - (i * this.scene_context.renderer.tile_height), 'dirt', this.scene_context.renderer.container);
             }
         }
 
-        this.cameras.main.centerOn(this.stage.container.x + this.stage.grid[2][2].sprite.x, this.stage.container.y + this.stage.grid[2][2].sprite.y);
+        this.cameras.main.centerOn(this.scene_context.renderer.container.x + this.stage.grid[2][2].sprite.x, this.scene_context.renderer.container.y + this.stage.grid[2][2].sprite.y);
     }
 
     // public render_entities(): void {

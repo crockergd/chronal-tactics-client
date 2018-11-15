@@ -38,6 +38,10 @@ export default class AbstractSprite {
         return this.framework_object.y;
     }
 
+    get visible(): boolean {
+        return this.framework_object.visible;
+    }
+
     // get width(): number {
     //     return Math.abs(this.framework_object.width) / this.renderer.DPR;
     // }
@@ -78,17 +82,17 @@ export default class AbstractSprite {
     // }
 
     // public add_animation(name: string, frames: Array<number>, frame_rate: number, loop: boolean): RenderAnimation {
-    //     const animation: RenderAnimation = new RenderAnimation(this.framework_object.animations.add(name, frames, frame_rate, loop));
-
-    //     return animation;
+        
     // }
 
     // public play_animation(name?: string, kill?: boolean): void {
-    //     if (!name) {
-    //         this.framework_object.animations.stop();
-    //     } else {
-    //         this.framework_object.animations.play(name, null, null, kill);
-    //     }
+    //     // if (!name) {
+    //     //     this.framework_object.animations.stop();
+    //     // } else {
+    //     //     this.framework_object.animations.play(name, null, null, kill);
+    //     // }
+
+    //     this.framework_object.
     // }
 
     // public crop(x: number, y: number, width: number, height: number): void {
