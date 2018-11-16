@@ -10,14 +10,22 @@ export default class Combat extends AbstractScene {
     private movement_entity: Entity;
     private movement_x: number;
     private movement_y: number;
+    
+    // add match complete emit
+    // add a way to distinguish teams
 
     public create(): void {
-        this.socket.on('room-closed', () => {
-            console.log('Session closed.');
-        });
-
         this.team = this.combat_data.team;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
+
+        this.socket.once('room-closed', () => {
+            this.socket.off('post-tick');
+
+            this.scene.start('lobby', {
+                scene_context: this.scene_context,
+                socket: this.socket
+            });
+        });
 
         this.render_stage();
         this.scene_context.renderer.initiate_battle(this.stage);
@@ -28,10 +36,6 @@ export default class Combat extends AbstractScene {
 
             this.scene_context.renderer.render_turn(this.stage.battle.get_last_turn());
         });
-
-        // this.battle.register_pre_tick_callback(this.on_pre_tick, this);
-        this.stage.battle.register_post_tick_callback(this.on_post_tick, this);
-        // this.battle.register_resoluble(Move);
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             for (const entity of this.stage.entities) {
@@ -67,15 +71,8 @@ export default class Combat extends AbstractScene {
                 facing.y = -1;
             }
 
-            if (!this.movement_entity.spatial.has_moved) {
-                // this.battle.add_delayed_resoluble(new Move(this.movement_entity));
-                // this.battle.call_resoluble('Move', true, this.movement_entity);
-
-                this.fire_resoluble('Face', this.movement_entity, facing);
-                this.fire_resoluble('Move', this.movement_entity);
-
-                this.movement_entity.spatial.has_moved = true;
-            }
+            this.fire_resoluble('Face', this.movement_entity, facing);
+            this.fire_resoluble('Move', this.movement_entity);
 
             this.movement_entity = null;
         }, this);
@@ -84,7 +81,6 @@ export default class Combat extends AbstractScene {
     public update(time: number, dt_ms: number): void {
         const dt: number = dt_ms / 1000;
         this.scene_context.renderer.update(this.stage);
-        this.scene_context.renderer.render(this.stage);
     }
 
     public fire_resoluble(key: string, ...args: any[]): void {
@@ -92,24 +88,6 @@ export default class Combat extends AbstractScene {
         this.socket.emit('resoluble', {
             resoluble: resoluble
         })
-    }
-
-    public on_pre_tick(): void {
-        // console.log('fweawe');
-
-        for (const entity of this.stage.entities) {
-            // this.stage.battle.add_delayed_resoluble(new Attack(entity, this.stage));
-
-            entity.spatial.has_moved = false;
-        }
-    }
-
-    public on_post_tick(turn: Turn): void {
-        for (const entity of this.stage.entities) {
-            entity.spatial.has_moved = false;
-        }
-
-        this.scene_context.renderer.post_tick(this.stage, turn);
     }
 
     public render_stage(): void {
@@ -127,12 +105,4 @@ export default class Combat extends AbstractScene {
 
         this.cameras.main.centerOn(this.scene_context.renderer.container.x + this.stage.grid[2][2].sprite.x, this.scene_context.renderer.container.y + this.stage.grid[2][2].sprite.y);
     }
-
-    // public render_entities(): void {
-    //     const cell: Cell = this.stage.grid[3][3];
-    //     const sprite: AbstractSprite = this.scene_context.renderer.add_sprite(this.stage.container.x + cell.sprite.x, this.stage.container.y + cell.sprite.y, 'bandit');
-
-    //     this.cameras.main.startFollow(sprite.framework_object);
-    //     this.cameras.main.stopFollow();
-    // }
 }

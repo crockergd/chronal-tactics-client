@@ -5,7 +5,7 @@ import AbstractContainer from '../abstracts/abstractcontainer';
 import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
-import { Turn, Entity, Resoluble } from 'turn-based-combat-framework';
+import { Resoluble, Move, Attack, Death } from 'turn-based-combat-framework';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -13,38 +13,51 @@ export default class RenderContext {
     public tile_width: number;
     public tile_height: number;
 
+    public get buffer(): number {
+        return 10;
+    }
+
+    public get width(): number {
+        return this.scene.cameras.main.width;
+    }
+
+    public get height(): number {
+        return this.scene.cameras.main.height;
+    }
+
+    public get center_x(): number {
+        return this.scene.cameras.main.centerX;
+    }
+
+    public get center_y(): number {
+        return this.scene.cameras.main.centerY;
+    }
+
     constructor() {
 
     }
 
     public update(stage: Stage): void {
-        for (const entity of stage.entities) {
-            // if (entity.get('dirty') as boolean) {
-            const position: Vector = this.local_to_world(entity.spatial.position);
-            entity.get('sprite').set_position(position.x, position.y);
-            entity.set('dirty', false);
-
-            if (!entity.alive && entity.get('sprite').visible) {
-                entity.get('sprite').set_visible(false);
-            }
-            // }
-        }
-    }
-
-    public render(stage: Stage): void {
-        // stage.remaining_text.text = stage.turn_remaining.toFixed(2);
-    }
-
-    public post_tick(stage: Stage, turn: Turn): void {
 
     }
 
     public render_turn(resolubles: Array<Resoluble>): void {
-        const attacks: Array<Resoluble> = resolubles.filter(resoluble => resoluble.type === 'Attack');
+        const movements: Array<Move> = resolubles.filter(resoluble => resoluble.type === 'Move') as any;
+        for (const resoluble of movements) {
+            const position: Vector = this.local_to_world(resoluble.source.spatial.position);
+            resoluble.source.get('sprite').set_position(position.x, position.y);
+        }
+
+        const attacks: Array<Attack> = resolubles.filter(resoluble => resoluble.type === 'Attack') as any;
         for (const resoluble of attacks) {
             for (const position of (resoluble as any).targetted_positions) {
                 this.render_effect('attack_effect', (position as any));
             }
+        }
+
+        const deaths: Array<Death> = resolubles.filter(resoluble => resoluble.type === 'Death') as any;
+        for (const resoluble of deaths) {
+            resoluble.target.get('sprite').set_visible(false);
         }
     }
 
@@ -59,7 +72,8 @@ export default class RenderContext {
 
     public initiate_battle(stage: Stage): void {
         for (const entity of stage.entities) {
-            entity.set('sprite', this.add_sprite(0, 0, entity.identifier.class_key), false);
+            const position: Vector = this.local_to_world(entity.spatial.position);
+            entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key), false);
             entity.get('sprite').set_anchor(0.5, 1.0);
             entity.get('sprite').framework_object.setInteractive();
             entity.set('dirty', true);

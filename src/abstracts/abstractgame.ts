@@ -2,6 +2,7 @@ import Boot from '../scenes/boot';
 import Combat from '../scenes/combat';
 import { Game } from 'phaser';
 import SceneContext from '../contexts/scenecontext';
+import Lobby from '../scenes/lobby';
 
 export default class AbstractGame extends Game {
     constructor(config: GameConfig) {
@@ -10,6 +11,7 @@ export default class AbstractGame extends Game {
         const scene_context: SceneContext = new SceneContext();
 
         this.scene.add('boot', Boot);
+        this.scene.add('lobby', Lobby);
         this.scene.add('combat', Combat);
 
         this.scene.start('boot', {

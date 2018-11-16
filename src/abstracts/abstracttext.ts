@@ -65,6 +65,6 @@ export default class AbstractText {
     }
 
     public set_position(x: number, y: number): void {
-        // this.framework_object.position.set(x, y);
+        this.framework_object.setPosition(x, y);
     }
 }

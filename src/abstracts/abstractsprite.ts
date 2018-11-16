@@ -46,9 +46,9 @@ export default class AbstractSprite {
     //     return Math.abs(this.framework_object.width) / this.renderer.DPR;
     // }
 
-    // get height(): number {
-    //     return Math.abs(this.framework_object.height) / this.renderer.DPR;
-    // }
+    get height(): number {
+        return Math.abs(this.framework_object.height); // / this.renderer.DPR;
+    }
 
     public set_position(x: number, y: number): void {
         this.framework_object.setPosition(x, y);
@@ -73,6 +73,11 @@ export default class AbstractSprite {
 
     public set_alpha(alpha: number): void {
         this.framework_object.alpha = alpha;
+    }
+
+    public on(key: string, callback: Function, context?: any): void {
+        this.framework_object.setInteractive();
+        this.framework_object.on(key, callback, context);
     }
 
     // public add_input_up(callback: Function, context: any, ...args: Array<any>): void {

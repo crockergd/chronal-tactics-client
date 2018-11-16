@@ -1,10 +1,20 @@
 import SceneContext from '../contexts/scenecontext';
 import { Scene } from 'phaser';
+import RenderContext from '../contexts/rendercontext';
+import ClientSettings from '../utils/clientsettings';
 
 export default class AbstractScene extends Scene {
     protected scene_context: SceneContext;
     protected socket: SocketIOClient.Socket;
     protected combat_data: any;
+
+    public get renderer(): RenderContext {
+        return this.scene_context.renderer;
+    }
+
+    public get settings(): ClientSettings {
+        return this.scene_context.settings;
+    }
 
     public init(data: any) {
         this.scene_context = data.scene_context;

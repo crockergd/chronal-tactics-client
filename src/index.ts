@@ -1,8 +1,8 @@
 import AbstractGame from './abstracts/abstractgame';
 
 window.addEventListener('DOMContentLoaded', () => {
-    let width: number = screen.width;
-    let height: number = screen.height;
+    let width: number = window.innerWidth;
+    let height: number = window.innerHeight
 
     let dpr: number = window.devicePixelRatio;
 
@@ -14,4 +14,11 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     const game: AbstractGame = new AbstractGame(config);
+
+    // window.addEventListener('resize', () => {
+    //     let width: number = window.innerWidth;
+    //     let height: number = window.innerHeight
+
+    //     game.resize(width, height);
+    // });
 });
