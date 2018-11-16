@@ -57,7 +57,7 @@ export default class RenderContext {
 
         const deaths: Array<Death> = resolubles.filter(resoluble => resoluble.type === 'Death') as any;
         for (const resoluble of deaths) {
-            resoluble.target.get('sprite').set_visible(false);
+            resoluble.target.get('sprite').set_frame(6);
         }
     }
 
@@ -73,7 +73,10 @@ export default class RenderContext {
     public initiate_battle(stage: Stage): void {
         for (const entity of stage.entities) {
             const position: Vector = this.local_to_world(entity.spatial.position);
-            entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key), false);
+            
+            const team_key: string = entity.team === 0 ? '_blue' : '_red';
+
+            entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key + team_key), false);
             entity.get('sprite').set_anchor(0.5, 1.0);
             entity.get('sprite').framework_object.setInteractive();
             entity.set('dirty', true);

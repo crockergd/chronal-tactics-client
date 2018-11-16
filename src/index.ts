@@ -10,7 +10,10 @@ window.addEventListener('DOMContentLoaded', () => {
         width: width,
         height: height,
         type: Phaser.AUTO,
-        resolution: dpr
+        resolution: dpr,
+        render: {
+            pixelArt: true
+        }
     };
 
     const game: AbstractGame = new AbstractGame(config);

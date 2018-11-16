@@ -52,6 +52,11 @@ export default class Lobby extends AbstractScene {
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {
+                if (!this.connected) {
+                    this.footer.text = 'Can\'t Connect to Server';
+                    return;
+                }
+
                 this.footer.text = 'Matchmaking...';
 
                 this.socket.once('matched', (payload: any) => {
@@ -67,7 +72,7 @@ export default class Lobby extends AbstractScene {
                     units: this.settings.units
                 });
 
-                this.matchmaking_started = new Date(Date.now());
+                this.matchmaking_started = new Date();
 
                 this.state = LobbyState.MATCHMAKING;
             }
@@ -100,13 +105,5 @@ export default class Lobby extends AbstractScene {
 
     private connect(): void {
         this.socket = Sio('http://localhost:3010');
-        // this.socket.once('connect', () => {
-        //     this.subtitle.text = 'Connected';
-
-        //     // this.socket.emit('init', {
-        //     //     name: 'George',
-        //     //     units: ['spearman']
-        //     // });
-        // });
     }
 }

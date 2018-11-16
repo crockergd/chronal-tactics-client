@@ -63,9 +63,9 @@ export default class AbstractSprite {
         this.framework_object.setOrigin(x, y);
     }
 
-    // public set_frame(frame: number): void {
-    //     this.framework_object.frame = frame;
-    // }
+    public set_frame(frame: number): void {
+        this.framework_object.setFrame(frame);
+    }
 
     public set_visible(visible: boolean): void {
         this.framework_object.visible = visible;

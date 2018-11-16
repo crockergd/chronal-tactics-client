@@ -6,7 +6,8 @@ export default class Boot extends AbstractScene {
     private subtitle: AbstractText;
 
     public preload(): void {
-        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Github Game-Off 2018');
+        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
+        this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_origin(0.5, 0.5);
 
@@ -34,8 +35,12 @@ export default class Boot extends AbstractScene {
         this.load.image('tile', require_image('./tile.png'));
         this.load.image('generic_btn', require_image('./generic_btn.png'));
 
-        this.load.spritesheet('bandit', require_tilesheet('./bandit.png'), { frameWidth: 110, frameHeight: 110 });
-        this.load.spritesheet('spearman', require_tilesheet('./spearman.png'), { frameWidth: 110, frameHeight: 110 });
+        // this.load.spritesheet('bandit', require_tilesheet('./bandit.png'), { frameWidth: 110, frameHeight: 110 });
+        this.load.spritesheet('bandit_blue', require_tilesheet('./bandit_blue.png'), { frameWidth: 110, frameHeight: 110 });
+        this.load.spritesheet('bandit_red', require_tilesheet('./bandit_red.png'), { frameWidth: 110, frameHeight: 110 });
+        // this.load.spritesheet('spearman', require_tilesheet('./spearman.png'), { frameWidth: 110, frameHeight: 110 });
+        this.load.spritesheet('spearman_blue', require_tilesheet('./spearman_blue.png'), { frameWidth: 110, frameHeight: 110 });
+        this.load.spritesheet('spearman_red', require_tilesheet('./spearman_red.png'), { frameWidth: 110, frameHeight: 110 });
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
     }
 }
