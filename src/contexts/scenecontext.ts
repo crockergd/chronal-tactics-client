@@ -19,10 +19,7 @@ export default class SceneContext {
     constructor() {
         this.render_context = new RenderContext();
 
-        this.client_settings = {
-            name: '',
-            units: ['bandit', 'spearman', 'bandit', 'spearman']
-        };
+        this.client_settings = { };
     }
 
     public set_scene(scene: AbstractScene): void {

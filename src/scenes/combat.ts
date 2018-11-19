@@ -41,7 +41,7 @@ export default class Combat extends AbstractScene {
         name_text.set_font_size(28);
         name_text.framework_object.setScrollFactor(0, 0);
         
-        const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, this.team === 0 ? 'Blue' : 'Red');
+        const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, 'Team ' + (this.team === 0 ? 'Blue' : 'Red'));
         team_text.set_font_size(20);
         team_text.framework_object.setScrollFactor(0, 0);
 

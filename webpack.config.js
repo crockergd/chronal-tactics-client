@@ -25,7 +25,7 @@ module.exports = function () {
 
         module: {
             rules: [
-                { test: /assets(\/|\\)/, loader: 'file-loader?name=assets/[hash].[ext]' },
+                { type: "javascript/auto", test: /assets(\/|\\)/, loader: 'file-loader?name=assets/[hash].[ext]' },
                 { test: /\.ts$/, loader: 'ts-loader', exclude: '/node_modules/' }
             ]
         },

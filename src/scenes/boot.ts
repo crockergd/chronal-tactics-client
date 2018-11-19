@@ -1,9 +1,13 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
+import MathExtensions from '../utils/mathextensions';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
     private subtitle: AbstractText;
+
+    private adjectives: Array<string>;
+    private firstnames: Array<string>;
 
     public preload(): void {
         this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
@@ -22,6 +26,16 @@ export default class Boot extends AbstractScene {
     }
 
     public create(): void {
+        const adjectives: Array<string> = this.cache.json.get('adjectives').adjectives;
+        const firstnames: Array<string> = this.cache.json.get('firstnames').firstnames;
+
+        const adjective: string = adjectives[MathExtensions.rand_int_inclusive(0, adjectives.length - 1)];
+        const firstname: string = firstnames[MathExtensions.rand_int_inclusive(0, firstnames.length - 1)];
+
+        this.settings.name = (adjective.charAt(0).toUpperCase() + adjective.slice(1)) + ' ' + firstname;
+
+        this.settings.units = ['spearman', 'bandit'];
+
         this.scene.start('lobby', {
             scene_context: this.scene_context
         });
@@ -30,6 +44,8 @@ export default class Boot extends AbstractScene {
     private load_assets(): void {
         const require_image: __WebpackModuleApi.RequireContext = require.context('../../assets/images/', true);
         const require_tilesheet: __WebpackModuleApi.RequireContext = require.context('../../assets/tilesheets/', true);
+        const require_json: __WebpackModuleApi.RequireContext = require.context('../../assets/json/', true);
+        const require_font: __WebpackModuleApi.RequireContext = require.context('../../assets/fonts/', true);
 
         this.load.image('dirt', require_image('./dirt.png'));
         this.load.image('tile', require_image('./tile.png'));
@@ -42,5 +58,8 @@ export default class Boot extends AbstractScene {
         this.load.spritesheet('spearman_blue', require_tilesheet('./spearman_blue.png'), { frameWidth: 110, frameHeight: 110 });
         this.load.spritesheet('spearman_red', require_tilesheet('./spearman_red.png'), { frameWidth: 110, frameHeight: 110 });
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
+
+        this.load.json('adjectives', require_json('./adjectives.json'));
+        this.load.json('firstnames', require_json('./firstnames.json'));
     }
 }

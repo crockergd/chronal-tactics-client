@@ -25,7 +25,7 @@ export default class Lobby extends AbstractScene {
     public create(): void {
         this.state = LobbyState.IDLE;
         this.can_connect = true;
-
+        
         this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
@@ -40,7 +40,7 @@ export default class Lobby extends AbstractScene {
         this.footer.set_position(this.footer.x, this.footer.y - ((this.footer.height * 2) + this.renderer.buffer));
 
         this.name = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
-        this.name.set_font_size(24);
+        this.name.set_font_size(28);
 
         const connect_btn: AbstractSprite = this.renderer.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
         connect_btn.set_scale(2.0, 2.0);
