@@ -5,7 +5,7 @@ import AbstractContainer from '../abstracts/abstractcontainer';
 import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
-import { Resoluble, Move, Attack, Death } from 'turn-based-combat-framework';
+import { Resoluble, Move, Attack, Death, Face, Entity } from 'turn-based-combat-framework';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -37,11 +37,12 @@ export default class RenderContext {
 
     }
 
-    public update(stage: Stage): void {
-
-    }
-
     public render_turn(resolubles: Array<Resoluble>): void {
+        const faces: Array<Face> = resolubles.filter(resoluble => resoluble.type === 'Face') as any;
+        for (const resoluble of faces) {
+            this.update_entity_facing(resoluble.source);
+        }
+
         const movements: Array<Move> = resolubles.filter(resoluble => resoluble.type === 'Move') as any;
         for (const resoluble of movements) {
             const position: Vector = this.local_to_world(resoluble.source.spatial.position);
@@ -57,7 +58,36 @@ export default class RenderContext {
 
         const deaths: Array<Death> = resolubles.filter(resoluble => resoluble.type === 'Death') as any;
         for (const resoluble of deaths) {
-            resoluble.target.get('sprite').set_frame(6);
+            let animation_key: string = 'death';
+            animation_key += '_' + resoluble.target.identifier.class_key;
+            animation_key += resoluble.target.team === 0 ? '_blue' : '_red';
+
+            resoluble.target.get('sprite').framework_object.play(animation_key);
+        }
+    }
+
+    public update_entity_facing(entity: Entity): void {
+        if (!entity.alive) {
+            return;
+        }
+
+        let animation_key: string;
+
+        if (entity.spatial.facing.y < 0) {
+            animation_key = 'idle_backward';
+        } else {
+            animation_key = 'idle_forward';
+        }
+
+        animation_key += '_' + entity.identifier.class_key;
+        animation_key += entity.team === 0 ? '_blue' : '_red';
+
+        entity.get('sprite').framework_object.play(animation_key);
+
+        if (entity.spatial.facing.x < 0) {
+            entity.get('sprite').framework_object.flipX = false;
+        } else {
+            entity.get('sprite').framework_object.flipX = true;
         }
     }
 
@@ -70,28 +100,65 @@ export default class RenderContext {
         });
     }
 
-    public initiate_battle(stage: Stage): void {
-        for (const entity of stage.entities) {
-            const position: Vector = this.local_to_world(entity.spatial.position);
-            
-            const team_key: string = entity.team === 0 ? '_blue' : '_red';
+    public render_stage(stage: Stage): void {
+        this.container = this.add_container(0, 0);
 
-            entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key + team_key), false);
+        const tile_key: string = 'base_tile';
+        const tile_scale_factor: number = 6;
+
+        const tile_dimensions: Vector = this.get_sprite_dimensions(tile_key);
+        tile_dimensions.x *= tile_scale_factor;
+        tile_dimensions.y *= tile_scale_factor;
+        this.tile_width = (tile_dimensions.x / 2);
+        this.tile_height = (tile_dimensions.y / 4) + 3;
+
+        for (let i: number = stage.width - 1; i >= 0; i--) {
+            for (let j: number = 0; j < stage.height; j++) {
+                const position: Vector = this.local_to_world(new Vector(i, j));
+
+                stage.grid[i][j].sprite = this.add_sprite(position.x, position.y, tile_key, this.container);
+                stage.grid[i][j].sprite.set_anchor(0.5, 0.25);
+                stage.grid[i][j].sprite.set_scale(tile_scale_factor, tile_scale_factor);
+            }
+        }
+
+        this.container.set_position(this.container.x + tile_dimensions.x, this.container.y + tile_dimensions.y * stage.height / 2);
+
+        const center_stage_x: number = ((tile_dimensions.x * stage.width) / 2);
+        const center_stage_y: number = ((tile_dimensions.y * stage.height) / 2) - this.tile_height;
+
+        const center_world: Vector = this.local_to_world(stage.get_center());
+        this.scene.cameras.main.centerOn(center_world.x, center_world.y);
+
+        // let bounds_x: number = 0;
+        // let bounds_y: number = 0;
+        // const bounds_width: number = (tile_dimensions.x * 2) + (center_stage_x * 2);
+        // const bounds_height: number = (tile_dimensions.y * 2) + (center_stage_y * 2);
+
+        // if (this.scene.cameras.main.width > bounds_width) {
+        //     bounds_x = -((this.scene.cameras.main.width - bounds_width) / 2);
+        // }
+        // if (this.scene.cameras.main.height > bounds_height) {
+        //     bounds_y = -((this.scene.cameras.main.height - bounds_height) / 2);
+        // }
+
+        // this.scene.cameras.main.setBounds(bounds_x, bounds_y, bounds_width, bounds_height);
+    }
+
+    public render_entities(stage: Stage): void {
+        for (const entity of stage.entities) {
+            if (entity.get('sprite')) continue;
+
+            const position: Vector = this.local_to_world(entity.spatial.position);
+            position.y += 15;
+
+            entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key), false);
             entity.get('sprite').set_anchor(0.5, 1.0);
             entity.get('sprite').framework_object.setInteractive();
             entity.set('dirty', true);
+            entity.get('sprite').set_scale(4, 4);
+            this.update_entity_facing(entity);
         }
-
-        stage.remaining_text = this.add_text(10, 10, '');
-        stage.remaining_text.framework_object.setScrollFactor(0);
-
-        this.scene.anims.create({
-            key: 'attack',
-            frames: this.scene.anims.generateFrameNumbers('attack_effect', {
-                start: 0,
-                end: 3
-            })
-        });
     }
 
     public add_container(x: number, y: number): AbstractContainer {
@@ -118,8 +185,41 @@ export default class RenderContext {
         return new Vector(sprite.width, sprite.height);
     }
 
-    private local_to_world(position: Vector): Vector {
-        return new Vector(this.container.x + (position.x * this.tile_width) + (position.y * this.tile_width),
-            this.container.y + (position.y * this.tile_height) - (position.x * this.tile_height));
+    public local_to_world(local: Vector): Vector {
+        const world: Vector = new Vector(local.x, local.y);
+
+        world.x *= this.tile_width;
+        world.x += local.y * this.tile_width;
+        world.y *= this.tile_height;
+        world.y -= local.x * this.tile_height;
+
+        world.x += this.container.x;
+        world.y += this.container.y;
+
+        return new Vector(world.x, world.y);
+    }
+
+    public world_to_local(world: Vector): Vector {
+        const local: Vector = new Vector(world.x, world.y);
+        local.x -= this.container.x;
+        local.y -= this.container.y;
+
+        local.x /= this.tile_width * 2;
+        local.x -= (world.y - this.container.y) / this.tile_width;
+
+        local.y /= this.tile_height;
+        local.y += (world.x - this.container.x) / (this.tile_height * 2);
+        local.y /= 2;
+
+        return new Vector(Math.round(local.x), Math.round(local.y));
+    }
+
+    public local_within_bounds(local: Vector, stage: Stage): boolean {
+        if (local.x < 0) return false;
+        if (local.y < 0) return false;
+        if (local.x > stage.width - 1) return false;
+        if (local.y > stage.height - 1) return false;
+
+        return true;
     }
 }

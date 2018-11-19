@@ -26,6 +26,8 @@ export default class Boot extends AbstractScene {
     }
 
     public create(): void {
+        this.register_animations();
+
         const adjectives: Array<string> = this.cache.json.get('adjectives').adjectives;
         const firstnames: Array<string> = this.cache.json.get('firstnames').firstnames;
 
@@ -34,7 +36,7 @@ export default class Boot extends AbstractScene {
 
         this.settings.name = (adjective.charAt(0).toUpperCase() + adjective.slice(1)) + ' ' + firstname;
 
-        this.settings.units = ['spearman', 'bandit'];
+        this.settings.units = ['sword_unit', 'spear_unit'];
 
         this.scene.start('lobby', {
             scene_context: this.scene_context
@@ -45,21 +47,135 @@ export default class Boot extends AbstractScene {
         const require_image: __WebpackModuleApi.RequireContext = require.context('../../assets/images/', true);
         const require_tilesheet: __WebpackModuleApi.RequireContext = require.context('../../assets/tilesheets/', true);
         const require_json: __WebpackModuleApi.RequireContext = require.context('../../assets/json/', true);
-        const require_font: __WebpackModuleApi.RequireContext = require.context('../../assets/fonts/', true);
 
-        this.load.image('dirt', require_image('./dirt.png'));
-        this.load.image('tile', require_image('./tile.png'));
-        this.load.image('generic_btn', require_image('./generic_btn.png'));
+        this.load.spritesheet('sword_unit', require_tilesheet('./sword_unit.png'), { frameWidth: 20, frameHeight: 30 });
+        this.load.spritesheet('spear_unit', require_tilesheet('./spear_unit.png'), { frameWidth: 20, frameHeight: 30 });
 
-        // this.load.spritesheet('bandit', require_tilesheet('./bandit.png'), { frameWidth: 110, frameHeight: 110 });
-        this.load.spritesheet('bandit_blue', require_tilesheet('./bandit_blue.png'), { frameWidth: 110, frameHeight: 110 });
-        this.load.spritesheet('bandit_red', require_tilesheet('./bandit_red.png'), { frameWidth: 110, frameHeight: 110 });
-        // this.load.spritesheet('spearman', require_tilesheet('./spearman.png'), { frameWidth: 110, frameHeight: 110 });
-        this.load.spritesheet('spearman_blue', require_tilesheet('./spearman_blue.png'), { frameWidth: 110, frameHeight: 110 });
-        this.load.spritesheet('spearman_red', require_tilesheet('./spearman_red.png'), { frameWidth: 110, frameHeight: 110 });
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
+        
+        this.load.image('base_tile', require_image('./base_tile.png'));
+        this.load.image('deploy_tile', require_image('./deploy_tile.png'));
+        this.load.image('generic_btn', require_image('./generic_btn.png'));
 
         this.load.json('adjectives', require_json('./adjectives.json'));
         this.load.json('firstnames', require_json('./firstnames.json'));
+    }
+
+    private register_animations(): void {
+        this.anims.create({
+            key: 'attack',
+            frames: this.anims.generateFrameNumbers('attack_effect', {
+                start: 0,
+                end: 3
+            })
+        });
+
+        this.anims.create({
+            key: 'idle_forward_sword_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('sword_unit', {
+                start: 0,
+                end: 3
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_sword_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('sword_unit', {
+                start: 4,
+                end: 7
+            })
+        });
+        this.anims.create({
+            key: 'death_sword_unit_blue',
+            frameRate: 6,
+            frames: [{
+                key: 'sword_unit',
+                frame: 8
+            }]
+        });
+
+        this.anims.create({
+            key: 'idle_forward_sword_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('sword_unit', {
+                start: 9,
+                end: 12
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_sword_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('sword_unit', {
+                start: 13,
+                end: 16
+            })
+        });
+        this.anims.create({
+            key: 'death_sword_unit_red',
+            frameRate: 6,
+            frames: [{
+                key: 'sword_unit',
+                frame: 17
+            }]
+        });
+
+        this.anims.create({
+            key: 'idle_forward_spear_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('spear_unit', {
+                start: 0,
+                end: 3
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_spear_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('spear_unit', {
+                start: 4,
+                end: 7
+            })
+        });
+        this.anims.create({
+            key: 'death_spear_unit_blue',
+            frameRate: 6,
+            frames: [{
+                key: 'spear_unit',
+                frame: 8
+            }]
+        });
+
+        this.anims.create({
+            key: 'idle_forward_spear_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('spear_unit', {
+                start: 9,
+                end: 12
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_spear_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('spear_unit', {
+                start: 13,
+                end: 16
+            })
+        });
+        this.anims.create({
+            key: 'death_spear_unit_red',
+            frameRate: 6,
+            frames: [{
+                key: 'spear_unit',
+                frame: 17
+            }]
+        });
     }
 }

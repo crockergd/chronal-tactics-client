@@ -42,6 +42,13 @@ export default class Stage {
 
         return null;
     }
+
+    public get_center(): Vector {
+        const center_x: number = Math.round((this.width - 1) / 2);
+        const center_y: number = Math.round((this.height - 1) / 2);
+
+        return new Vector(center_x, center_y);
+    }
     
     public toJSON(): any {
         const json: any = {

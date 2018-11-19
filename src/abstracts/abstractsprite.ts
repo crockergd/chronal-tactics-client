@@ -16,20 +16,6 @@ export default class AbstractSprite {
         }
     }
 
-    // public static create_from_mask(renderer: RenderContext, state: Phaser.State, x: number, y: number, mask_key: string, source_key: string, group?: RenderGroup): RenderSprite {
-    //     const mask_sprite: Phaser.Sprite = state.make.sprite(0, 0, mask_key);
-    //     mask_sprite.scale.set(renderer.scale_factor, renderer.scale_factor);
-
-    //     const source_sprite: Phaser.Sprite = state.make.sprite(0, 0, source_key);
-    //     source_sprite.scale.set(renderer.scale_factor, renderer.scale_factor);
-
-    //     const source_bmd: Phaser.BitmapData = state.make.bitmapData(source_sprite.width, source_sprite.height);
-    //     source_bmd.smoothed = false;
-    //     source_bmd.alphaMask(source_sprite, mask_sprite);
-
-    //     return new RenderSprite(renderer, state, x, y, source_bmd, group);
-    // }
-
     get x(): number {
         return this.framework_object.x;
     }
@@ -41,10 +27,6 @@ export default class AbstractSprite {
     get visible(): boolean {
         return this.framework_object.visible;
     }
-
-    // get width(): number {
-    //     return Math.abs(this.framework_object.width) / this.renderer.DPR;
-    // }
 
     get height(): number {
         return Math.abs(this.framework_object.height); // / this.renderer.DPR;
@@ -75,16 +57,18 @@ export default class AbstractSprite {
         this.framework_object.alpha = alpha;
     }
 
+    public set_scroll(scroll_x: number, scroll_y: number): void {
+        this.framework_object.setScrollFactor(scroll_x, scroll_y);
+    }
+
+    public affix_ui(): void {
+        this.set_scroll(0, 0);
+    }
+
     public on(key: string, callback: Function, context?: any): void {
         this.framework_object.setInteractive();
         this.framework_object.on(key, callback, context);
     }
-
-    // public add_input_up(callback: Function, context: any, ...args: Array<any>): void {
-    //     if (!this.framework_object.inputEnabled) this.framework_object.inputEnabled = true;
-
-    //     this.framework_object.events.onInputUp.add(callback, context, null, ...args);
-    // }
 
     // public add_animation(name: string, frames: Array<number>, frame_rate: number, loop: boolean): RenderAnimation {
         

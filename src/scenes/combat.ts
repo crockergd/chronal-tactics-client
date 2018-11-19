@@ -3,6 +3,7 @@ import Stage from '../stages/stage';
 import Vector from '../utils/vector';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
+import AbstractSprite from '../abstracts/abstractsprite';
 
 export default class Combat extends AbstractScene {
     private stage: Stage;
@@ -12,12 +13,15 @@ export default class Combat extends AbstractScene {
     private movement_x: number;
     private movement_y: number;
 
-    // add a way to tell which direction a unit is moving
+    private deploy_class: string;
+    private deploy_position: Vector;
+
+    private deploy_tile: AbstractSprite;
+
+    // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
+    // revisit stage centering code and camera bounds, probably have it center on your side on the middle of your team
 
     public create(): void {
-        this.team = this.combat_data.team;
-        this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
-
         this.socket.once('room-closed', () => {
             this.socket.off('post-tick');
 
@@ -27,8 +31,155 @@ export default class Combat extends AbstractScene {
             });
         });
 
-        this.render_stage();
-        this.scene_context.renderer.initiate_battle(this.stage);
+        this.team = this.combat_data.team;
+        this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
+
+        this.renderer.render_stage(this.stage);
+        this.scene_context.renderer.render_entities(this.stage); // prob remove
+
+        const name_text: AbstractText = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
+        name_text.set_font_size(28);
+        name_text.framework_object.setScrollFactor(0, 0);
+
+        const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, 'Team ' + (this.team === 0 ? 'Blue' : 'Red'));
+        team_text.set_font_size(20);
+        team_text.framework_object.setScrollFactor(0, 0);
+
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            this.movement_x = pointer.x;
+            this.movement_y = pointer.y;
+        });
+
+        // this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        //     if (!pointer.isDown) return;
+        //     if (this.movement_entity) return;
+
+        //     const scroll_x: number = (this.movement_x - pointer.x) / 2;
+        //     const scroll_y: number = (this.movement_y - pointer.y) / 2;
+
+        //     this.movement_x = pointer.x;
+        //     this.movement_y = pointer.y;
+
+        //     this.cameras.main.setScroll(this.cameras.main.scrollX + scroll_x, this.cameras.main.scrollY + scroll_y);
+        // }, this);
+
+        this.socket.emit('deployment-ready');
+        this.socket.once('deployment-started', () => {
+            this.begin_deployment();
+        });
+    }
+
+    public fire_resoluble(key: string, ...args: any[]): void {
+        const resoluble: any = this.stage.battle.serialize_resoluble(key, ...args);
+        this.socket.emit('resoluble', {
+            resoluble: resoluble
+        });
+    }
+
+    private begin_deployment(): void {
+        const class_keys: Array<string> = ['sword_unit', 'spear_unit'];
+
+        this.deploy_tile = this.renderer.add_sprite(0, 0, 'deploy_tile');
+        this.deploy_tile.set_scale(6, 6);
+        this.deploy_tile.set_anchor(0.5, 0.25);
+        this.deploy_tile.set_visible(false);
+
+        let index: number = 0;
+        for (const class_key of class_keys) {
+            const sprite: AbstractSprite = this.renderer.add_sprite(this.renderer.width - (100 * index), this.renderer.height, class_key);
+            sprite.set_frame(1);
+            sprite.set_scale(4, 4);
+            sprite.set_anchor(1, 1);
+            sprite.framework_object.setScrollFactor(0, 0);
+
+            sprite.on('pointerdown', () => {
+                this.deploy_class = class_key;
+            }, this);
+
+            index++;
+        }
+
+        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+            if (!this.deploy_class) return;
+
+            this.deploy_position = null;
+
+            const local_pos: Vector = this.renderer.world_to_local(new Vector(pointer.worldX, pointer.worldY));
+            if (!this.renderer.local_within_bounds(local_pos, this.stage)) {
+                this.deploy_tile.set_visible(false);
+                return;
+            }
+
+            this.deploy_position = new Vector(local_pos.x, local_pos.y);
+            const world_pos: Vector = this.renderer.local_to_world(local_pos);
+            this.deploy_tile.set_position(world_pos.x, world_pos.y);
+            this.deploy_tile.set_visible(true);
+        }, this);
+
+        this.input.on('pointerup', () => {
+            if (!this.deploy_class || !this.deploy_position) {
+                this.deploy_tile.set_visible(false);
+                this.deploy_position = null;
+                this.deploy_class = null;
+                return;
+            }
+
+            const entity: Entity = new Entity();
+            entity.identifier.class_key = this.deploy_class;
+            entity.combat.alive = true;
+            entity.combat.current_health = 1;
+            entity.spatial = {
+                position: this.deploy_position,
+                facing: this.team === 0 ? new Vector(1, -1, 0) : new Vector(-1, 1, 0),
+                has_moved: false
+            };
+
+            this.stage.battle.add_entity(entity, this.team);
+
+            this.renderer.render_entities(this.stage);
+
+            this.deploy_tile.set_visible(false);
+            this.deploy_position = null;
+            this.deploy_class = null;
+        });
+
+        const ready_btn: AbstractSprite = this.renderer.add_sprite(this.renderer.center_x, this.renderer.height, 'generic_btn');
+        ready_btn.set_scale(2.0, 2.0);
+        ready_btn.set_position(ready_btn.x, ready_btn.y - (ready_btn.height * 3));
+        ready_btn.affix_ui();
+
+        const ready_text: AbstractText = this.renderer.add_text(ready_btn.x, ready_btn.y, 'Ready');
+        ready_text.set_font_size(36);
+        ready_text.set_origin(0.5, 0.5);
+        ready_text.affix_ui();
+
+        ready_btn.on('pointerup', () => {
+            const entities: Array<Entity> = this.stage.battle.get_entities();
+
+            this.socket.emit('deployment-complete', {
+                entities: entities.map((entity: Entity) => {
+                    return [entity.identifier.class_key, entity.spatial.position];
+                })
+            });
+
+            ready_btn.destroy();
+            ready_text.destroy();
+
+            this.socket.once('battle-started', (payload: any) => {
+                for (const entity of this.stage.battle.get_entities()) {
+                    entity.get('sprite').destroy();
+                }
+
+                this.stage = Stage.fromJSON(JSON.parse(payload.stage));
+                this.begin_battle();
+            });
+        });
+    }
+
+    private begin_battle(): void {
+        this.renderer.render_entities(this.stage);
+        this.input.removeAllListeners();
+        this.init_input();
 
         this.socket.on('post-tick', (data: any) => {
             const turn_json: any = data.turn;
@@ -36,15 +187,9 @@ export default class Combat extends AbstractScene {
 
             this.scene_context.renderer.render_turn(this.stage.battle.get_last_turn());
         });
+    }
 
-        const name_text: AbstractText = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
-        name_text.set_font_size(28);
-        name_text.framework_object.setScrollFactor(0, 0);
-        
-        const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, 'Team ' + (this.team === 0 ? 'Blue' : 'Red'));
-        team_text.set_font_size(20);
-        team_text.framework_object.setScrollFactor(0, 0);
-
+    private init_input(): void {
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
@@ -98,51 +243,5 @@ export default class Combat extends AbstractScene {
 
             this.cameras.main.setScroll(this.cameras.main.scrollX + scroll_x, this.cameras.main.scrollY + scroll_y);
         }, this);
-    }
-
-    public update(time: number, dt_ms: number): void {
-        const dt: number = dt_ms / 1000;
-        this.scene_context.renderer.update(this.stage);
-    }
-
-    public fire_resoluble(key: string, ...args: any[]): void {
-        const resoluble: any = this.stage.battle.serialize_resoluble(key, ...args);
-        this.socket.emit('resoluble', {
-            resoluble: resoluble
-        })
-    }
-
-    public render_stage(): void {
-        this.scene_context.renderer.container = this.scene_context.renderer.add_container(0, 0);
-
-        const tile_dimensions: Vector = this.scene_context.renderer.get_sprite_dimensions('dirt');
-        this.scene_context.renderer.tile_width = tile_dimensions.x / 2.0 + 3;
-        this.scene_context.renderer.tile_height = (tile_dimensions.y / 2.0) - 5 + 3;
-
-        for (let i: number = this.stage.width - 1; i >= 0; i--) {
-            for (let j: number = 0; j < this.stage.height; j++) {
-                this.stage.grid[i][j].sprite = this.scene_context.renderer.add_sprite(i * this.scene_context.renderer.tile_width + (j * this.scene_context.renderer.tile_width), (j * this.scene_context.renderer.tile_height) - (i * this.scene_context.renderer.tile_height), 'dirt', this.scene_context.renderer.container);
-
-            }
-        }
-
-        this.renderer.container.set_position(this.renderer.container.x + tile_dimensions.x, this.renderer.container.y + (this.renderer.tile_height * this.stage.height) - this.renderer.tile_height + tile_dimensions.y);
-        const center_stage_x: number = ((tile_dimensions.x * this.stage.width) / 2);
-        const center_stage_y: number = ((tile_dimensions.y * this.stage.height) / 2) - this.renderer.tile_height;
-        this.cameras.main.centerOn(tile_dimensions.x + center_stage_x, tile_dimensions.y + center_stage_y);
-
-        let bounds_x: number = 0;
-        let bounds_y: number = 0;
-        const bounds_width: number = (tile_dimensions.x * 2) + (center_stage_x * 2);
-        const bounds_height: number = (tile_dimensions.y * 2) + (center_stage_y * 2);
-
-        if (this.cameras.main.width > bounds_width) {
-            bounds_x = -((this.cameras.main.width - bounds_width) / 2);
-        }
-        if (this.cameras.main.height > bounds_height) {
-            bounds_y = -((this.cameras.main.height - bounds_height) / 2);
-        }
-
-        this.cameras.main.setBounds(bounds_x, bounds_y, bounds_width, bounds_height);
     }
 }

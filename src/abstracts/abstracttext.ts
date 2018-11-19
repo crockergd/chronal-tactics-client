@@ -67,4 +67,16 @@ export default class AbstractText {
     public set_position(x: number, y: number): void {
         this.framework_object.setPosition(x, y);
     }
+
+    public set_scroll(scroll_x: number, scroll_y: number): void {
+        this.framework_object.setScrollFactor(scroll_x, scroll_y);
+    }
+
+    public affix_ui(): void {
+        this.set_scroll(0, 0);
+    }
+
+    public destroy(): void {
+        this.framework_object.destroy();
+    }
 }
