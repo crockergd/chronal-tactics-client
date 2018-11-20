@@ -52,6 +52,8 @@ module.exports = function () {
         devServer: {
             contentBase: path.join(__dirname, 'www'),
             port: 3001,
+            host: '0.0.0.0', 
+            open: true,          
             inline: true,
             compress: true,
             watchOptions: {

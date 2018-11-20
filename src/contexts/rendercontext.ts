@@ -6,35 +6,45 @@ import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
 import { Resoluble, Move, Attack, Death, Face, Entity } from 'turn-based-combat-framework';
+import AbstractGroup from '../abstracts/abstractgroup';
 
 export default class RenderContext {
     public scene: AbstractScene;
     public container: AbstractContainer;
     public tile_width: number;
     public tile_height: number;
+    public ui_camera: Phaser.Cameras.Scene2D.Camera;
 
     public get buffer(): number {
         return 10;
     }
 
     public get width(): number {
-        return this.scene.cameras.main.width;
+        return this.camera.displayWidth;
     }
 
     public get height(): number {
-        return this.scene.cameras.main.height;
+        return this.camera.displayHeight;
     }
 
     public get center_x(): number {
-        return this.scene.cameras.main.centerX;
+        return this.camera.centerX;
     }
 
     public get center_y(): number {
-        return this.scene.cameras.main.centerY;
+        return this.camera.centerY;
+    }
+    
+    public get camera(): Phaser.Cameras.Scene2D.Camera {
+        return this.scene.cameras.main;
+    }
+
+    public get entity_adjust_y(): number {
+        return 15;
     }
 
     constructor() {
-
+        
     }
 
     public render_turn(resolubles: Array<Resoluble>): void {
@@ -46,6 +56,7 @@ export default class RenderContext {
         const movements: Array<Move> = resolubles.filter(resoluble => resoluble.type === 'Move') as any;
         for (const resoluble of movements) {
             const position: Vector = this.local_to_world(resoluble.source.spatial.position);
+            position.y += this.entity_adjust_y;
             resoluble.source.get('sprite').set_position(position.x, position.y);
         }
 
@@ -124,11 +135,8 @@ export default class RenderContext {
 
         this.container.set_position(this.container.x + tile_dimensions.x, this.container.y + tile_dimensions.y * stage.height / 2);
 
-        const center_stage_x: number = ((tile_dimensions.x * stage.width) / 2);
-        const center_stage_y: number = ((tile_dimensions.y * stage.height) / 2) - this.tile_height;
-
         const center_world: Vector = this.local_to_world(stage.get_center());
-        this.scene.cameras.main.centerOn(center_world.x, center_world.y);
+        this.camera.centerOn(center_world.x, center_world.y);
 
         // let bounds_x: number = 0;
         // let bounds_y: number = 0;
@@ -150,7 +158,7 @@ export default class RenderContext {
             if (entity.get('sprite')) continue;
 
             const position: Vector = this.local_to_world(entity.spatial.position);
-            position.y += 15;
+            position.y += this.entity_adjust_y;
 
             entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key), false);
             entity.get('sprite').set_anchor(0.5, 1.0);
@@ -167,13 +175,19 @@ export default class RenderContext {
         return container;
     }
 
-    public add_sprite(x: number, y: number, key: string, container?: AbstractContainer): AbstractSprite {
+    public add_group(): AbstractGroup {
+        const group: AbstractGroup = new AbstractGroup(this, this.scene);
+
+        return group;
+    }
+
+    public add_sprite(x: number, y: number, key: string, container?: AbstractContainer | AbstractGroup): AbstractSprite {
         const sprite: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, container);
 
         return sprite;
     }
 
-    public add_text(x: number, y: number, text: string, container?: AbstractContainer): AbstractText {
+    public add_text(x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup): AbstractText {
         const render_text: AbstractText = new AbstractText(this, this.scene, x, y, text, container);
 
         return render_text;

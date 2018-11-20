@@ -23,9 +23,11 @@ export default class Lobby extends AbstractScene {
     }
 
     public create(): void {
-        this.state = LobbyState.IDLE;
-        this.can_connect = true;
+        // const bg: AbstractSprite = this.renderer.add_sprite(0, 0, 'gradient');
         
+        this.state = LobbyState.IDLE;
+        this.can_connect = true;        
+                
         this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
@@ -44,7 +46,7 @@ export default class Lobby extends AbstractScene {
 
         const connect_btn: AbstractSprite = this.renderer.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
         connect_btn.set_scale(2.0, 2.0);
-        connect_btn.set_position(connect_btn.x, connect_btn.y - (connect_btn.height * 3));
+        connect_btn.set_position(connect_btn.x, connect_btn.y - (connect_btn.height * 2));
 
         const connect_text: AbstractText = this.renderer.add_text(connect_btn.x, connect_btn.y, 'Play');
         connect_text.set_font_size(36);
@@ -64,7 +66,7 @@ export default class Lobby extends AbstractScene {
                         scene_context: this.scene_context,
                         socket: this.socket,
                         combat_data: payload
-                    });
+                    }); 
                 });
 
                 this.socket.emit('matchmake', {
@@ -104,6 +106,6 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio('http://localhost:3010');
+        this.socket = Sio('http://192.168.1.142:3010');
     }
 }

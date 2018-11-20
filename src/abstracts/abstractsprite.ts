@@ -2,14 +2,17 @@ import RenderContext from '../contexts/rendercontext';
 import { GameObjects } from 'phaser';
 import AbstractScene from './abstractscene';
 import AbstractContainer from './abstractcontainer';
+import AbstractGroup from './abstractgroup';
 
 export default class AbstractSprite {
     private renderer: RenderContext;
     public framework_object: GameObjects.Sprite;
 
-    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, container?: AbstractContainer) {
+    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, container?: AbstractContainer | AbstractGroup) {
         this.renderer = renderer;
         this.framework_object = scene.add.sprite(x, y, key);
+
+        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);        
 
         if (container) {
             container.add(this);
@@ -28,8 +31,12 @@ export default class AbstractSprite {
         return this.framework_object.visible;
     }
 
+    get width(): number {
+        return this.framework_object.displayWidth;
+    }
+
     get height(): number {
-        return Math.abs(this.framework_object.height); // / this.renderer.DPR;
+        return this.framework_object.displayHeight; // / this.renderer.DPR;
     }
 
     public set_position(x: number, y: number): void {
@@ -62,7 +69,12 @@ export default class AbstractSprite {
     }
 
     public affix_ui(): void {
-        this.set_scroll(0, 0);
+        if (this.renderer.ui_camera) {
+            this.framework_object.cameraFilter &= ~this.renderer.ui_camera.id;
+            this.renderer.camera.ignore(this.framework_object);
+        } else {
+            this.set_scroll(0, 0);
+        }
     }
 
     public on(key: string, callback: Function, context?: any): void {

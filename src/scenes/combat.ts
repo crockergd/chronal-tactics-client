@@ -4,6 +4,7 @@ import Vector from '../utils/vector';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
+import AbstractGroup from '../abstracts/abstractgroup';
 
 export default class Combat extends AbstractScene {
     private stage: Stage;
@@ -13,9 +14,9 @@ export default class Combat extends AbstractScene {
     private movement_x: number;
     private movement_y: number;
 
+    private deploy_ui: AbstractGroup;
     private deploy_class: string;
     private deploy_position: Vector;
-
     private deploy_tile: AbstractSprite;
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
@@ -23,6 +24,7 @@ export default class Combat extends AbstractScene {
 
     public create(): void {
         this.socket.once('room-closed', () => {
+            this.socket.off('deployment_started');
             this.socket.off('post-tick');
 
             this.scene.start('lobby', {
@@ -30,6 +32,11 @@ export default class Combat extends AbstractScene {
                 socket: this.socket
             });
         });
+
+        // this.renderer.ui_camera = this.cameras.add(0, 0, this.renderer.width, this.renderer.height);
+
+        const bg: AbstractSprite = this.renderer.add_sprite(0, 0, 'gradient');
+        bg.affix_ui();
 
         this.team = this.combat_data.team;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
@@ -39,11 +46,11 @@ export default class Combat extends AbstractScene {
 
         const name_text: AbstractText = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
         name_text.set_font_size(28);
-        name_text.framework_object.setScrollFactor(0, 0);
+        name_text.affix_ui();
 
         const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, 'Team ' + (this.team === 0 ? 'Blue' : 'Red'));
         team_text.set_font_size(20);
-        team_text.framework_object.setScrollFactor(0, 0);
+        team_text.affix_ui();
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.movement_x = pointer.x;
@@ -60,11 +67,11 @@ export default class Combat extends AbstractScene {
         //     this.movement_x = pointer.x;
         //     this.movement_y = pointer.y;
 
-        //     this.cameras.main.setScroll(this.cameras.main.scrollX + scroll_x, this.cameras.main.scrollY + scroll_y);
+        //     this.renderer.camera.setScroll(this.renderer.camera.scrollX + scroll_x, this.renderer.camera.scrollY + scroll_y);
         // }, this);
 
         this.socket.emit('deployment-ready');
-        this.socket.once('deployment-started', () => {
+        this.socket.on('deployment-started', () => {
             this.begin_deployment();
         });
     }
@@ -77,7 +84,15 @@ export default class Combat extends AbstractScene {
     }
 
     private begin_deployment(): void {
-        const class_keys: Array<string> = ['sword_unit', 'spear_unit'];
+        this.deploy_ui = this.renderer.add_group();
+
+        const unit_frame: AbstractSprite = this.renderer.add_sprite(this.renderer.width, this.renderer.height, 'unit_frame', this.deploy_ui);
+        unit_frame.set_scale(4, 4);
+        unit_frame.set_anchor(1, 1);
+        unit_frame.set_position(unit_frame.x, unit_frame.y - (unit_frame.height / 2));
+        unit_frame.affix_ui();
+
+        const class_keys: Array<string> = ['sword_unit', 'spear_unit', 'bow_unit'];
 
         this.deploy_tile = this.renderer.add_sprite(0, 0, 'deploy_tile');
         this.deploy_tile.set_scale(6, 6);
@@ -86,11 +101,12 @@ export default class Combat extends AbstractScene {
 
         let index: number = 0;
         for (const class_key of class_keys) {
-            const sprite: AbstractSprite = this.renderer.add_sprite(this.renderer.width - (100 * index), this.renderer.height, class_key);
-            sprite.set_frame(1);
+            const sprite: AbstractSprite = this.renderer.add_sprite(unit_frame.x, unit_frame.y - (unit_frame.height / 2), class_key, this.deploy_ui);
+            sprite.set_frame(this.team === 0 ? 1 : 10);
             sprite.set_scale(4, 4);
-            sprite.set_anchor(1, 1);
-            sprite.framework_object.setScrollFactor(0, 0);
+            sprite.set_anchor(1, 0.5);
+            sprite.set_position(sprite.x - (((sprite.width + this.renderer.buffer) * index) + sprite.width / 2), sprite.y);
+            sprite.affix_ui();
 
             sprite.on('pointerdown', () => {
                 this.deploy_class = class_key;
@@ -145,7 +161,7 @@ export default class Combat extends AbstractScene {
 
         const ready_btn: AbstractSprite = this.renderer.add_sprite(this.renderer.center_x, this.renderer.height, 'generic_btn');
         ready_btn.set_scale(2.0, 2.0);
-        ready_btn.set_position(ready_btn.x, ready_btn.y - (ready_btn.height * 3));
+        ready_btn.set_position(ready_btn.x, ready_btn.y - (ready_btn.height * 2));
         ready_btn.affix_ui();
 
         const ready_text: AbstractText = this.renderer.add_text(ready_btn.x, ready_btn.y, 'Ready');
@@ -178,6 +194,8 @@ export default class Combat extends AbstractScene {
 
     private begin_battle(): void {
         this.renderer.render_entities(this.stage);
+        this.deploy_ui.destroy();
+        this.deploy_ui = null;
         this.input.removeAllListeners();
         this.init_input();
 
@@ -195,7 +213,7 @@ export default class Combat extends AbstractScene {
             this.movement_y = pointer.y;
 
             for (const entity of this.stage.entities) {
-                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.cameras.main).length) {
+                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.renderer.camera).length) {
                     this.movement_entity = entity;
                     return;
                 }
@@ -234,14 +252,14 @@ export default class Combat extends AbstractScene {
         this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
             if (!pointer.isDown) return;
             if (this.movement_entity) return;
-            
+
             const scroll_x: number = (this.movement_x - pointer.x) / 2;
             const scroll_y: number = (this.movement_y - pointer.y) / 2;
 
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
 
-            this.cameras.main.setScroll(this.cameras.main.scrollX + scroll_x, this.cameras.main.scrollY + scroll_y);
+            this.renderer.camera.setScroll(this.renderer.camera.scrollX + scroll_x, this.renderer.camera.scrollY + scroll_y);
         }, this);
     }
 }

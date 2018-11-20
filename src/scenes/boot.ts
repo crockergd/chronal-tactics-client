@@ -1,6 +1,7 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import MathExtensions from '../utils/mathextensions';
+import AbstractSprite from '../abstracts/abstractsprite';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -50,15 +51,29 @@ export default class Boot extends AbstractScene {
 
         this.load.spritesheet('sword_unit', require_tilesheet('./sword_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('spear_unit', require_tilesheet('./spear_unit.png'), { frameWidth: 20, frameHeight: 30 });
+        this.load.spritesheet('bow_unit', require_tilesheet('./bow_unit.png'), { frameWidth: 20, frameHeight: 30 });
 
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
-        
+
         this.load.image('base_tile', require_image('./base_tile.png'));
         this.load.image('deploy_tile', require_image('./deploy_tile.png'));
         this.load.image('generic_btn', require_image('./generic_btn.png'));
+        this.load.image('unit_frame', require_image('./unit_frame.png'));
 
         this.load.json('adjectives', require_json('./adjectives.json'));
         this.load.json('firstnames', require_json('./firstnames.json'));
+
+        const gradient_texture: Phaser.Textures.CanvasTexture = this.textures.createCanvas('gradient', this.renderer.width * 2, this.renderer.height * 2);
+        const gradient_context: CanvasRenderingContext2D = gradient_texture.getContext();
+        const gradient: CanvasGradient = gradient_context.createLinearGradient(gradient_texture.width / 2, 0, gradient_texture.width / 2, gradient_texture.height);
+
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(1, '#004CB3');
+
+        gradient_texture.getContext().fillStyle = gradient;
+        gradient_texture.getContext().fillRect(0, 0, gradient_texture.width, gradient_texture.height);
+
+        gradient_texture.refresh();
     }
 
     private register_animations(): void {
@@ -174,6 +189,60 @@ export default class Boot extends AbstractScene {
             frameRate: 6,
             frames: [{
                 key: 'spear_unit',
+                frame: 17
+            }]
+        });
+
+        this.anims.create({
+            key: 'idle_forward_bow_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('bow_unit', {
+                start: 0,
+                end: 3
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_bow_unit_blue',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('bow_unit', {
+                start: 4,
+                end: 7
+            })
+        });
+        this.anims.create({
+            key: 'death_bow_unit_blue',
+            frameRate: 6,
+            frames: [{
+                key: 'bow_unit',
+                frame: 8
+            }]
+        });
+
+        this.anims.create({
+            key: 'idle_forward_bow_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('bow_unit', {
+                start: 9,
+                end: 12
+            })
+        });
+        this.anims.create({
+            key: 'idle_backward_bow_unit_red',
+            frameRate: 6,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('bow_unit', {
+                start: 13,
+                end: 16
+            })
+        });
+        this.anims.create({
+            key: 'death_bow_unit_red',
+            frameRate: 6,
+            frames: [{
+                key: 'bow_unit',
                 frame: 17
             }]
         });

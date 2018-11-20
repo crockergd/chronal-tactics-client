@@ -1,6 +1,7 @@
 import { GameObjects, Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
 import AbstractContainer from './abstractcontainer';
+import AbstractGroup from './abstractgroup';
 
 export default class AbstractText {
     private renderer: RenderContext;
@@ -14,10 +15,12 @@ export default class AbstractText {
         strokeThickness: 2
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer) {
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         // this.framework_object.lineSpacing = -4;
+
+        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
 
         if (container) {
             container.add(this);
@@ -73,7 +76,12 @@ export default class AbstractText {
     }
 
     public affix_ui(): void {
-        this.set_scroll(0, 0);
+        if (this.renderer.ui_camera) {
+            this.framework_object.cameraFilter &= ~this.renderer.ui_camera.id;
+            this.renderer.camera.ignore(this.framework_object);
+        } else {
+            this.set_scroll(0, 0);
+        }
     }
 
     public destroy(): void {
