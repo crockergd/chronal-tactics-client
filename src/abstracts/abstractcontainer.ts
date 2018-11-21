@@ -1,9 +1,9 @@
 import RenderContext from '../contexts/rendercontext';
 import { GameObjects } from 'phaser';
 import AbstractScene from './abstractscene';
-import Vector from '../utils/vector';
 import AbstractSprite from './abstractsprite';
 import AbstractText from './abstracttext';
+import { Vector } from 'turn-based-combat-framework';
 
 export default class AbstractContainer {
     private renderer: RenderContext;

@@ -6,8 +6,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = function () {
     const config = {
-        mode: 'development',
-        devtool: 'source-map',
+        mode: 'production',
 
         entry: './src/index.ts',
 
@@ -44,21 +43,9 @@ module.exports = function () {
         optimization: {
             minimizer: [
                 new UglifyJsPlugin({
-
+                    
                 })
             ]
-        },
-
-        devServer: {
-            contentBase: path.join(__dirname, 'www'),
-            port: 3001,   
-            inline: true,
-            compress: true,
-            watchOptions: {
-                aggregateTimeout: 300,
-                poll: true,
-                ignored: /node_modules/
-            }
         }
     };
 

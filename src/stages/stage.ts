@@ -1,8 +1,6 @@
 import Cell from './cell';
-import AbstractContainer from '../abstracts/abstractcontainer';
 import AbstractText from '../abstracts/abstracttext';
-import Vector from '../utils/vector';
-import { Battle, TickMode, Entity } from 'turn-based-combat-framework';
+import { Battle, TickMode, Entity, Vector } from 'turn-based-combat-framework';
 
 export default class Stage {
     public battle: Battle;

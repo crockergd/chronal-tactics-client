@@ -2,10 +2,9 @@ import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
 import AbstractContainer from '../abstracts/abstractcontainer';
-import Vector from '../utils/vector';
 import { Textures } from 'phaser';
 import Stage from '../stages/stage';
-import { Resoluble, Move, Attack, Death, Face, Entity } from 'turn-based-combat-framework';
+import { Resoluble, Move, Attack, Death, Face, Entity, Vector } from 'turn-based-combat-framework';
 import AbstractGroup from '../abstracts/abstractgroup';
 
 export default class RenderContext {

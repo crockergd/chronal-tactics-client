@@ -1,6 +1,6 @@
+import Sio from 'socket.io-client';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
-import Sio from 'socket.io-client';
 import AbstractSprite from '../abstracts/abstractsprite';
 
 enum LobbyState {
@@ -22,9 +22,7 @@ export default class Lobby extends AbstractScene {
         return this.socket && this.socket.connected;
     }
 
-    public create(): void {
-        // const bg: AbstractSprite = this.renderer.add_sprite(0, 0, 'gradient');
-        
+    public create(): void {        
         this.state = LobbyState.IDLE;
         this.can_connect = true;        
                 
@@ -81,15 +79,7 @@ export default class Lobby extends AbstractScene {
         });
     }
 
-    public update(time: number, dt_ms: number): void {
-        // if (!this.connected) {
-        //     // if (this.subtitle.text !== 'Disconnected') this.subtitle.text = 'Disconnected';
-        //     if (this.can_connect) {
-        //         this.connect();
-        //         // if (this.subtitle.text !== 'Connected') this.subtitle.text = 'Connected';
-        //     }
-        // }        
-
+    public update(time: number, dt_ms: number): void { 
         if (!this.socket) this.connect();
 
         if (this.state === LobbyState.MATCHMAKING) {
@@ -106,6 +96,6 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio('http://192.168.1.142:3010');
+        this.socket = Sio('http://138.197.171.67:3010');
     }
 }

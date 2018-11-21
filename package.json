@@ -5,12 +5,15 @@
     "private": true,
     "scripts": {
         "start": "webpack-dev-server",
-        "build": "webpack"
+        "build": "webpack",
+        "build:prod": "rm -rf www && webpack --config webpack.prod.js",
+        "deploy": "npm run build:prod && cd www && git add --all && git commit -am 'Publish to gh-pages.' && git push origin gh-pages"
     },
     "dependencies": {
         "@types/socket.io-client": "^1.4.32",
         "phaser": "^3.15.1",
-        "socket.io-client": "^2.1.1"
+        "socket.io-client": "^2.1.1",
+        "turn-based-combat-framework": "0.0.1"
     },
     "devDependencies": {
         "@types/node": "^10.12.2",

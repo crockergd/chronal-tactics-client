@@ -1,6 +1,5 @@
-import { Entity } from 'turn-based-combat-framework';
+import { Entity, Vector } from 'turn-based-combat-framework';
 import Stage from '../stages/stage';
-import Vector from '../utils/vector';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
