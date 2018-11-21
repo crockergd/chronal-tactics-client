@@ -7,7 +7,7 @@
         "start": "webpack-dev-server",
         "build": "webpack",
         "build:prod": "rm -rf www && webpack --config webpack.prod.js",
-        "deploy": "npm run build:prod && cd www && git add --all && git commit -am 'Publish to gh-pages.' && git push origin gh-pages"
+        "deploy": "cd www && git add --all && git commit -m 'Deploy to gh-pages.' && git push origin gh-pages"
     },
     "dependencies": {
         "@types/socket.io-client": "^1.4.32",
