@@ -43,7 +43,7 @@ export default class AbstractText {
         return Math.abs(this.framework_object.height);
     }
 
-    public set_origin(x: number, y: number): void {
+    public set_anchor(x: number, y: number): void {
         this.framework_object.setOrigin(x, y);
     }
 

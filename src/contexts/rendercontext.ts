@@ -43,6 +43,14 @@ export default class RenderContext {
         return 15;
     }
 
+    public get unit_scalar(): number {
+        return 4;
+    }
+
+    public get tile_scalar(): number {
+        return 6;
+    }
+
     constructor() {
         
     }
@@ -115,11 +123,10 @@ export default class RenderContext {
         this.container = this.add_container(0, 0);
 
         const tile_key: string = 'base_tile';
-        const tile_scale_factor: number = 6;
 
         const tile_dimensions: Vector = this.get_sprite_dimensions(tile_key);
-        tile_dimensions.x *= tile_scale_factor;
-        tile_dimensions.y *= tile_scale_factor;
+        tile_dimensions.x *= this.tile_scalar;
+        tile_dimensions.y *= this.tile_scalar;
         this.tile_width = (tile_dimensions.x / 2);
         this.tile_height = (tile_dimensions.y / 4) + 3;
 
@@ -129,7 +136,7 @@ export default class RenderContext {
 
                 stage.grid[i][j].sprite = this.add_sprite(position.x, position.y, tile_key, this.container);
                 stage.grid[i][j].sprite.set_anchor(0.5, 0.25);
-                stage.grid[i][j].sprite.set_scale(tile_scale_factor, tile_scale_factor);
+                stage.grid[i][j].sprite.set_scale(this.tile_scalar, this.tile_scalar);
             }
         }
 
@@ -164,7 +171,7 @@ export default class RenderContext {
             entity.get('sprite').set_anchor(0.5, 1.0);
             entity.get('sprite').framework_object.setInteractive();
             entity.set('dirty', true);
-            entity.get('sprite').set_scale(4, 4);
+            entity.get('sprite').set_scale(this.unit_scalar, this.unit_scalar);
             this.update_entity_facing(entity);
         }
     }
@@ -235,5 +242,13 @@ export default class RenderContext {
         if (local.y > stage.height - 1) return false;
 
         return true;
+    }
+
+    public local_within_specific(local: Vector, tiles: Array<Vector>): boolean {
+        for (const tile of tiles) {
+            if (local.x === tile.x && local.y === tile.y) return true;
+        }
+
+        return false;
     }
 }

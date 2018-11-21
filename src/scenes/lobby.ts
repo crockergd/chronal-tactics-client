@@ -31,14 +31,14 @@ export default class Lobby extends AbstractScene {
         this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
-        this.title.set_origin(0.5, 0.5);
+        this.title.set_anchor(0.5, 0.5);
 
         this.subtitle = this.renderer.add_text(this.cameras.main.width - this.renderer.buffer, this.renderer.buffer, '');
-        this.subtitle.set_origin(1, 0);
+        this.subtitle.set_anchor(1, 0);
 
         this.footer = this.renderer.add_text(this.renderer.center_x, this.renderer.height, '');
         this.footer.set_font_size(24);
-        this.footer.set_origin(0.5, 1);
+        this.footer.set_anchor(0.5, 1);
         this.footer.set_position(this.footer.x, this.footer.y - ((this.footer.height * 2) + this.renderer.buffer));
 
         this.name = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
@@ -50,7 +50,7 @@ export default class Lobby extends AbstractScene {
 
         const connect_text: AbstractText = this.renderer.add_text(connect_btn.x, connect_btn.y, 'Play');
         connect_text.set_font_size(36);
-        connect_text.set_origin(0.5, 0.5);
+        connect_text.set_anchor(0.5, 0.5);
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {

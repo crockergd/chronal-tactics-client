@@ -82,6 +82,15 @@ export default class AbstractSprite {
         this.framework_object.on(key, callback, context);
     }
 
+    public once(key: string, callback: Function, context?: any): void {
+        this.framework_object.setInteractive();
+        this.framework_object.once(key, callback, context);
+    }
+
+    public play(key: string): void {
+        this.framework_object.play(key);
+    }
+
     // public add_animation(name: string, frames: Array<number>, frame_rate: number, loop: boolean): RenderAnimation {
         
     // }
@@ -102,5 +111,6 @@ export default class AbstractSprite {
 
     public destroy(): void {
         this.framework_object.destroy();
+        this.framework_object = null;
     }
 }
