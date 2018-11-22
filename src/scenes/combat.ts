@@ -43,6 +43,9 @@ export default class Combat extends AbstractScene {
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // revisit stage centering code and camera bounds, probably have it center on your side on the middle of your team
     // z order units
+    // fix issue where client doesnt receive deployment started packet
+    // fix issue where client starts receiving mangled serialized turns and breaks, switch back to production webpack when fixed
+    // investigate ssl connection issues on server
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';
@@ -70,7 +73,7 @@ export default class Combat extends AbstractScene {
         bg.affix_ui();
 
         this.renderer.render_stage(this.stage);
-        this.scene_context.renderer.render_entities(this.stage); // prob remove
+        this.renderer.render_entities(this.stage);
 
         const name_text: AbstractText = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
         name_text.set_font_size(28);
@@ -112,6 +115,13 @@ export default class Combat extends AbstractScene {
 
             const turn_json: any = data.turn;
             this.stage.battle.deserialize_turn(turn_json);
+
+            for (const entity of this.stage.entities) {
+                if (entity.get('facing_sprite')) {
+                    entity.get('facing_sprite').destroy();
+                    entity.set('facing_sprite', null);
+                }
+            }
 
             this.scene_context.renderer.render_turn(this.stage.battle.get_last_turn());
         });
@@ -329,6 +339,7 @@ export default class Combat extends AbstractScene {
 
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
             if (!this.movement_entity) return;
+            if (!this.movement_entity.alive) return;
             if (Math.abs(pointer.x - this.movement_x) < 30) return;
             if (Math.abs(pointer.y - this.movement_y) < 30) return;
             if (this.movement_entity.identifier.team !== this.team) {
@@ -349,6 +360,28 @@ export default class Combat extends AbstractScene {
             } else {
                 facing.y = -1;
             }
+
+            if (this.movement_entity.get('facing_sprite')) {
+                this.movement_entity.get('facing_sprite').destroy();
+                this.movement_entity.set('facing_sprite', null);
+            }
+            
+            const facing_sprite: AbstractSprite = this.renderer.add_sprite(this.movement_entity.get('sprite').x, this.movement_entity.get('sprite').y, 'directional_ring');
+            facing_sprite.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
+            facing_sprite.set_anchor(0.5, 0.4);
+            facing_sprite.set_depth(this.renderer.facing_depth);
+
+            if (facing.x > 0 && facing.y > 0) {
+                facing_sprite.set_frame(1);
+            } else if (facing.x > 0 && facing.y < 0) {
+                facing_sprite.set_frame(3);
+            } else if (facing.x < 0 && facing.y > 0) {
+                facing_sprite.set_frame(0);
+            } else if (facing.x < 0 && facing.y < 0) {
+                facing_sprite.set_frame(2);
+            }
+
+            this.movement_entity.set('facing_sprite', facing_sprite);
 
             this.fire_resoluble('Face', this.movement_entity, facing);
             this.fire_resoluble('Move', this.movement_entity);

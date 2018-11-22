@@ -1,7 +1,6 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import MathExtensions from '../utils/mathextensions';
-import AbstractSprite from '../abstracts/abstractsprite';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -52,6 +51,7 @@ export default class Boot extends AbstractScene {
         this.load.spritesheet('sword_unit', require_tilesheet('./sword_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('spear_unit', require_tilesheet('./spear_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('bow_unit', require_tilesheet('./bow_unit.png'), { frameWidth: 20, frameHeight: 30 });
+        this.load.spritesheet('directional_ring', require_tilesheet('./directional_ring.png'), { frameWidth: 30, frameHeight: 30 });
 
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
 

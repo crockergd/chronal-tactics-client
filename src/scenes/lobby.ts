@@ -96,6 +96,6 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio('http://138.197.171.67:3010');
+        this.socket = Sio('https://radbee.me:3010');
     }
 }

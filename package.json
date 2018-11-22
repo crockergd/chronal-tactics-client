@@ -6,7 +6,7 @@
     "scripts": {
         "start": "webpack-dev-server",
         "build": "webpack",
-        "build:prod": "rm -rf www && webpack --config webpack.prod.js",
+        "build:prod": "webpack --config webpack.prod.js",
         "deploy": "cd www && git add --all && git commit -m 'Deploy to gh-pages.' && git push origin gh-pages"
     },
     "dependencies": {

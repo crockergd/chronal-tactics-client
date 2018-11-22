@@ -68,6 +68,10 @@ export default class AbstractSprite {
         this.framework_object.setScrollFactor(scroll_x, scroll_y);
     }
 
+    public set_depth(depth: number): void {
+        this.framework_object.setDepth(depth);
+    }
+
     public affix_ui(): void {
         if (this.renderer.ui_camera) {
             this.framework_object.cameraFilter &= ~this.renderer.ui_camera.id;

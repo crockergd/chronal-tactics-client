@@ -50,6 +50,14 @@ export default class RenderContext {
         return 6;
     }
 
+    public get unit_depth(): number {
+        return 2;
+    }
+
+    public get facing_depth(): number {
+        return 1;
+    }
+
     constructor() {
         
     }
@@ -169,6 +177,7 @@ export default class RenderContext {
             entity.set('sprite', this.add_sprite(position.x, position.y, entity.identifier.class_key), false);
             entity.get('sprite').set_anchor(0.5, 1.0);
             entity.get('sprite').framework_object.setInteractive();
+            entity.get('sprite').set_depth(this.unit_depth);
             entity.set('dirty', true);
             entity.get('sprite').set_scale(this.unit_scalar, this.unit_scalar);
             this.update_entity_facing(entity);
