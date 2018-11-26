@@ -85,6 +85,9 @@ export default class AbstractText {
     }
 
     public destroy(): void {
-        this.framework_object.destroy();
+        if (this.framework_object) {
+            this.framework_object.destroy();
+            this.framework_object = null;
+        }
     }
 }

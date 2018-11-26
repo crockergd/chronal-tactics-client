@@ -12,7 +12,7 @@ export default class AbstractSprite {
         this.renderer = renderer;
         this.framework_object = scene.add.sprite(x, y, key);
 
-        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);        
+        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
 
         if (container) {
             container.add(this);
@@ -95,26 +95,10 @@ export default class AbstractSprite {
         this.framework_object.play(key);
     }
 
-    // public add_animation(name: string, frames: Array<number>, frame_rate: number, loop: boolean): RenderAnimation {
-        
-    // }
-
-    // public play_animation(name?: string, kill?: boolean): void {
-    //     // if (!name) {
-    //     //     this.framework_object.animations.stop();
-    //     // } else {
-    //     //     this.framework_object.animations.play(name, null, null, kill);
-    //     // }
-
-    //     this.framework_object.
-    // }
-
-    // public crop(x: number, y: number, width: number, height: number): void {
-    //     this.framework_object.crop(new Phaser.Rectangle(x, y, width * this.renderer.DPR, height * this.renderer.DPR), false);
-    // }
-
     public destroy(): void {
-        this.framework_object.destroy();
-        this.framework_object = null;
+        if (this.framework_object) {
+            this.framework_object.destroy();
+            this.framework_object = null;
+        }
     }
 }

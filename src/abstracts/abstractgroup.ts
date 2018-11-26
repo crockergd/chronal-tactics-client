@@ -16,8 +16,10 @@ export default class AbstractGroup {
     public add(child: AbstractSprite | AbstractText): void {
         this.framework_object.add(child.framework_object);
     }
-    
+
     public destroy(): void {
-        this.framework_object.destroy(true);
+        if (this.framework_object) {
+            this.framework_object.destroy(true);
+        }
     }
 }

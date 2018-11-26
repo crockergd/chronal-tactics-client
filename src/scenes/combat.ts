@@ -56,16 +56,29 @@ export default class Combat extends AbstractScene {
     }
 
     public create(): void {
+        this.events.once('shutdown', () => {
+            if (this.stage) this.stage.destroy();
+            if (this.deploy_stat_text) this.deploy_stat_text.destroy();
+            if (this.ready_stat_text) this.ready_stat_text.destroy();
+            if (this.deploy_ui) this.deploy_ui.destroy();
+            if (this.deploy_unit) this.deploy_unit.destroy();
+            if (this.ready_btn) this.ready_btn.destroy();
+            if (this.ready_text) this.ready_text.destroy();
+
+            this.team = null;
+            this.state = null;
+        }, this);
+
         this.socket.once('room-closed', () => {
             this.socket.removeAllListeners();
 
-            this.scene.start('lobby', {
+            this.start('lobby', {
                 scene_context: this.scene_context,
                 socket: this.socket
             });
         });
 
-        this.state = CombatState.CREATED;
+        this.change_state(CombatState.CREATED);
         this.team = this.combat_data.team;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
 
@@ -90,7 +103,7 @@ export default class Combat extends AbstractScene {
 
         this.socket.on('deployment-started', (deployment_payload: any) => {
             if (this.state !== CombatState.CREATED) return;
-            this.state = CombatState.DEPLOYMENT_STARTED;
+            this.change_state(CombatState.DEPLOYMENT_STARTED);
 
             this.deploy_max = deployment_payload.deployment_max;
             const deployment_tiles: Array<Vector> = deployment_payload.deployment_tiles;
@@ -99,15 +112,57 @@ export default class Combat extends AbstractScene {
 
         this.socket.on('battle-started', (payload: any) => {
             if (this.state !== CombatState.DEPLOYMENT_COMPLETE) return;
-            this.state = CombatState.BATTLE_STARTED;
+            this.change_state(CombatState.BATTLE_STARTED);
 
-            for (const entity of this.stage.battle.get_entities()) {
-                entity.get('sprite').destroy();
-            }
+            this.stage.destroy();
             this.stage = null;
 
             this.stage = Stage.fromJSON(JSON.parse(payload.stage));
             this.begin_battle();
+        });
+
+        this.socket.on('battle-completed', (payload: any) => {
+            this.socket.removeAllListeners();
+            this.input.removeAllListeners();
+
+            const winning_team: number = payload.winning_team;
+            let completed_string: string = '';
+
+            if (winning_team < 0) {
+                completed_string = 'Tie';
+            } else if (winning_team === this.team) {
+                completed_string = 'You Win';
+            } else {
+                completed_string = 'You Lose';
+            }
+
+            // const alpha_fill: Phaser.Graphics = this.make.graphics(0, 0);
+            // alpha_fill.beginFill(0x000);
+            // alpha_fill.drawRect(0, 0, this.world.width, this.world.height);
+            // alpha_fill.endFill();
+            // const alpha_fill_sprite: Phaser.Sprite = this.add.sprite(0, 0, alpha_fill.generateTexture());
+            // alpha_fill_sprite.alpha = 0;
+            // alpha_fill_sprite.inputEnabled = true;
+            // this.add.tween(alpha_fill_sprite).to({ alpha: 0.7 }, 1600, Phaser.Easing.Linear.None, true).onComplete.addOnce(() => {
+
+            const alpha_fill: Phaser.GameObjects.Graphics = this.add.graphics();
+            alpha_fill.fillStyle(0x000, 0.5);
+            alpha_fill.fillRect(0, 0, this.renderer.width, this.renderer.height);
+            alpha_fill.setScrollFactor(0, 0);
+            alpha_fill.setDepth(3);
+
+            const completed_text: AbstractText = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y, completed_string);
+            completed_text.set_font_size(96);
+            completed_text.set_anchor(0.5, 0.5);
+            completed_text.affix_ui();
+            completed_text.framework_object.setDepth(3);
+
+            this.input.once('pointerup', () => {
+                this.start('lobby', {
+                    scene_context: this.scene_context,
+                    socket: this.socket
+                });
+            }, this);
         });
 
         this.socket.on('post-tick', (data: any) => {
@@ -138,7 +193,7 @@ export default class Combat extends AbstractScene {
                 case CombatState.CREATED:
                     this.socket.emit('deployment-ready');
                     break;
-                    
+
                 case CombatState.DEPLOYMENT_COMPLETE:
                     this.socket.emit('battle-ready', {
                         entities: this.stage.battle.get_entities().map((entity: Entity) => {
@@ -299,7 +354,7 @@ export default class Combat extends AbstractScene {
         this.ready_text.affix_ui();
 
         this.ready_btn.once('pointerup', () => {
-            this.state = CombatState.DEPLOYMENT_COMPLETE;
+            this.change_state(CombatState.DEPLOYMENT_COMPLETE);
             this.ready_packet();
         }, this);
     }
@@ -365,7 +420,7 @@ export default class Combat extends AbstractScene {
                 this.movement_entity.get('facing_sprite').destroy();
                 this.movement_entity.set('facing_sprite', null);
             }
-            
+
             const facing_sprite: AbstractSprite = this.renderer.add_sprite(this.movement_entity.get('sprite').x, this.movement_entity.get('sprite').y, 'directional_ring');
             facing_sprite.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
             facing_sprite.set_anchor(0.5, 0.4);
@@ -401,5 +456,10 @@ export default class Combat extends AbstractScene {
 
             this.renderer.camera.setScroll(this.renderer.camera.scrollX + scroll_x, this.renderer.camera.scrollY + scroll_y);
         }, this);
+    }
+
+    private change_state(state: CombatState): void {
+        // console.log('State changed from ' + this.state + ' to ' + state + '.');
+        this.state = state;
     }
 }

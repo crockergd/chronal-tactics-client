@@ -15,17 +15,25 @@ export default class Lobby extends AbstractScene {
     private name: AbstractText;
 
     private state: LobbyState;
-    private can_connect: boolean;
     private matchmaking_started: Date;
 
     public get connected(): boolean {
         return this.socket && this.socket.connected;
     }
 
-    public create(): void {        
+    public create(): void {
+        this.events.once('shutdown', () => {
+            if (this.title) this.title.destroy();
+            if (this.subtitle) this.subtitle.destroy();
+            if (this.footer) this.footer.destroy();
+            if (this.name) this.name.destroy();
+
+            this.state = null;
+            this.matchmaking_started = null;
+        }, this);
+
         this.state = LobbyState.IDLE;
-        this.can_connect = true;        
-                
+
         this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
@@ -59,12 +67,12 @@ export default class Lobby extends AbstractScene {
 
                 this.footer.text = 'Matchmaking...';
 
-                this.socket.once('matched', (payload: any) => {
-                    this.scene.start('combat', {
+                this.socket.once('matched', (payload: any) => {    
+                    this.start('combat', {
                         scene_context: this.scene_context,
                         socket: this.socket,
                         combat_data: payload
-                    }); 
+                    });
                 });
 
                 this.socket.emit('matchmake', {
@@ -79,7 +87,7 @@ export default class Lobby extends AbstractScene {
         });
     }
 
-    public update(time: number, dt_ms: number): void { 
+    public update(time: number, dt_ms: number): void {
         if (!this.socket) this.connect();
 
         if (this.state === LobbyState.MATCHMAKING) {
@@ -89,7 +97,7 @@ export default class Lobby extends AbstractScene {
 
             this.footer.text += '     ';
             this.footer.text += now.getMinutes().toString();
-            this.footer.text += ':' 
+            this.footer.text += ':'
             if (now.getSeconds() < 10) this.footer.text += '0';
             this.footer.text += now.getSeconds().toString();
         }
@@ -97,5 +105,6 @@ export default class Lobby extends AbstractScene {
 
     private connect(): void {
         this.socket = Sio('https://radbee.me:3010');
+        // this.socket = Sio('localhost:3010');
     }
 }

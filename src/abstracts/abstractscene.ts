@@ -23,4 +23,8 @@ export default class AbstractScene extends Scene {
         this.socket = data.socket;
         this.combat_data = data.combat_data;
     }
+
+    public start(key: string, data: any): void {
+        this.scene.start(key, data);
+    }
 }

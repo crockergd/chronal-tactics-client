@@ -43,7 +43,9 @@ module.exports = function () {
         optimization: {
             minimizer: [
                 new UglifyJsPlugin({
-                    
+                    uglifyOptions: {
+                        keep_fnames: true
+                    }
                 })
             ]
         }

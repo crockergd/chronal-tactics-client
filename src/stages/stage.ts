@@ -1,5 +1,4 @@
 import Cell from './cell';
-import AbstractText from '../abstracts/abstracttext';
 import { Battle, TickMode, Entity, Vector } from 'turn-based-combat-framework';
 
 export default class Stage {
@@ -10,8 +9,6 @@ export default class Stage {
     public turn_remaining: number;
 
     public grid: Cell[][];
-
-    public remaining_text: AbstractText;
 
     public get entities(): Entity[] {
         return this.battle.get_entities();
@@ -46,6 +43,20 @@ export default class Stage {
         const center_y: number = Math.round((this.height - 1) / 2);
 
         return new Vector(center_x, center_y);
+    }
+
+    public destroy(): void {
+        if (this.battle) {
+            for (const entity of this.battle.get_entities()) {
+                if (!entity) continue;
+                if (!entity.get('sprite')) continue;
+
+                entity.get('sprite').destroy();
+                entity.set('sprite', null);
+            }
+        }
+
+        this.battle = null;
     }
     
     public toJSON(): any {
