@@ -34,7 +34,7 @@ export default class Lobby extends AbstractScene {
 
         this.state = LobbyState.IDLE;
 
-        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Knights');
+        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_anchor(0.5, 0.5);

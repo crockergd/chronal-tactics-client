@@ -31,7 +31,7 @@ module.exports = function () {
 
         plugins: [
             new HtmlWebpackPlugin({
-                title: 'Isochronal Knights',
+                title: 'Isochronal Tactics',
                 template: path.resolve(__dirname, 'templates', 'index.ejs')
             }),
 

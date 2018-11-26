@@ -13,7 +13,6 @@
             "userDataDir": "${workspaceRoot}/.vscode/chrome",
             "sourceMaps": true,
             "smartStep": true,            
-            // "preLaunchTask": "webpack-browser",
             "trace": true,
             "internalConsoleOptions": "openOnSessionStart",
             "runtimeArgs": [
