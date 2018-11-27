@@ -39,8 +39,8 @@ export default class Combat extends AbstractScene {
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // redraw unit sprites
-    // clean up attack sprites, maybe add red tiles to show attack range
     // apply reverse proxy on server, maybe host client on radbee
+    // add tutorial
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';

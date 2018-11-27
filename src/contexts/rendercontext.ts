@@ -34,11 +34,14 @@ export default class RenderContext {
         return this.scene.cameras.main;
     }
 
-    public render_effect(effect_key: string, position: Vector): void {
+    public render_effect(effect_key: string, position: Vector, callback?: Function, context?: any): void {
         const sprite: AbstractSprite = this.add_sprite(position.x, position.y, effect_key);
-        sprite.set_anchor(0.5, 1);
+        // sprite.set_anchor(0.5, 1);
+        sprite.set_scale(6, 6);
+        sprite.set_anchor(0.5, 0.25);
         sprite.framework_object.play('attack').on('animationcomplete', (animation: any, animation_frame: any, sprite: Phaser.GameObjects.Sprite) => {
             sprite.destroy();
+            if (callback) callback.call(context);
         });
     }
 

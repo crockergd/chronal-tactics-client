@@ -36,8 +36,6 @@ export default class Boot extends AbstractScene {
 
         this.settings.name = (adjective.charAt(0).toUpperCase() + adjective.slice(1)) + ' ' + firstname;
 
-        this.settings.units = ['sword_unit', 'spear_unit'];
-
         this.scene.start('lobby', {
             scene_context: this.scene_context
         });
@@ -52,11 +50,11 @@ export default class Boot extends AbstractScene {
         this.load.spritesheet('spear_unit', require_tilesheet('./spear_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('bow_unit', require_tilesheet('./bow_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('directional_ring', require_tilesheet('./directional_ring.png'), { frameWidth: 30, frameHeight: 30 });
-
-        this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 80, frameHeight: 110 });
+        this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 30, frameHeight: 30 });
 
         this.load.image('base_tile', require_image('./base_tile.png'));
         this.load.image('deploy_tile', require_image('./deploy_tile.png'));
+        this.load.image('attack_tile', require_image('./attack_tile.png'));
         this.load.image('generic_btn', require_image('./generic_btn.png'));
         this.load.image('unit_frame', require_image('./unit_frame.png'));
 
