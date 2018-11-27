@@ -10,8 +10,7 @@
     "scripts": {
         "start": "webpack-dev-server",
         "build": "webpack",
-        "build:prod": "webpack --config webpack.prod.js",
-        "deploy": "cd www && git add --all && git commit -m 'Deploy to gh-pages.' && git push origin gh-pages"
+        "build:prod": "webpack --config webpack.prod.js"
     },
     "dependencies": {
         "@types/socket.io-client": "^1.4.32",

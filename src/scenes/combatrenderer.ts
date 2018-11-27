@@ -19,7 +19,7 @@ export default class CombatRenderer {
     public ready_stat_text: AbstractText;
     public ready_btn: AbstractSprite;
     public ready_text: AbstractText;
-
+    public timer_text: AbstractText;
 
     public get entity_adjust_y(): number {
         return 15;
@@ -229,6 +229,17 @@ export default class CombatRenderer {
         } else {
             this.deploy_unit.play('idle_forward_' + deployment_class + '_red');
         }
+    }
+
+    public render_timer(timer: number, interval: number): void {
+        if (!this.timer_text) {
+            this.timer_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer, '');
+            this.timer_text.set_font_size(20);
+            this.timer_text.set_anchor(0.5, 0);
+            this.timer_text.affix_ui();
+        }
+
+        this.timer_text.text = timer.toFixed(2);
     }
 
     public update_entity_facing(entity: Entity): void {

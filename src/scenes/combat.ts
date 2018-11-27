@@ -3,8 +3,6 @@ import Stage from '../stages/stage';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
-import AbstractGroup from '../abstracts/abstractgroup';
-import ClientSettings from '../utils/clientsettings';
 import CombatRenderer from './combatrenderer';
 
 enum CombatState {
@@ -30,21 +28,21 @@ export default class Combat extends AbstractScene {
     private deploy_class: string;
     private deploy_position: Vector;
 
-    private players_ready: number = 0;
+    private players_ready: number;
     private players_max: number = 2;
 
     private packet_resend: number = 1;
     private packet_sent: number = 0;
+
+    private timer: number = 0;
+    private interval: number = 3;
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // revisit stage centering code and camera bounds, probably have it center on your side on the middle of your team
     // z order units
     // redraw unit sprites
     // change font
-    // split render state into combatrenderer, generic render code in rendercontext
     // have the time between moves drop each time a unit is killed
-    // test at different screen sizes, ensure you can place units without ready button getting in the way
-    // send opponents name across, display
     // display a meter of some kind ticking down the server tick period
     // clean up attack sprites, maybe add red tiles to show attack range
 
@@ -59,6 +57,8 @@ export default class Combat extends AbstractScene {
     public create(): void {
         this.socket.once('disconnect', () => { this.drop_to_lobby(); });
         this.socket.once('room-closed', () => { this.drop_to_lobby(); });
+
+        this.players_ready = 0;
 
         this.change_state(CombatState.CREATED);
         this.settings.team = this.combat_data.team;
@@ -102,6 +102,9 @@ export default class Combat extends AbstractScene {
 
             this.stage = Stage.fromJSON(JSON.parse(payload.stage));
             this.begin_battle();
+
+            this.interval = payload.interval;
+            this.timer = this.interval;
         });
 
         this.socket.on('battle-completed', (payload: any) => {
@@ -134,10 +137,10 @@ export default class Combat extends AbstractScene {
             this.input.once('pointerup', this.drop_to_lobby, this);
         });
 
-        this.socket.on('post-tick', (data: any) => {
+        this.socket.on('post-tick', (payload: any) => {
             if (this.state !== CombatState.BATTLE_STARTED) return;
 
-            const turn_json: any = data.turn;
+            const turn_json: any = payload.turn;
             this.stage.battle.deserialize_turn(turn_json);
 
             for (const entity of this.stage.entities) {
@@ -148,6 +151,9 @@ export default class Combat extends AbstractScene {
             }
 
             this.renderer.render_turn(this.stage.battle.get_last_turn());
+
+            this.interval = payload.interval;
+            this.timer = this.interval;
         });
 
         this.ready_packet();
@@ -180,6 +186,12 @@ export default class Combat extends AbstractScene {
             case CombatState.DEPLOYMENT_COMPLETE:
                 if (this.renderer.ready_stat_text.text !== this.players_ready_string) this.renderer.ready_stat_text.text = this.players_ready_string;
                 if (this.renderer.deploy_stat_text.text !== this.units_deployed_string) this.renderer.deploy_stat_text.text = this.units_deployed_string;
+                break;
+
+            case CombatState.BATTLE_STARTED:
+                this.timer -= dt;
+                this.timer = Math.max(0, this.timer);
+                this.renderer.render_timer(this.timer, this.interval);
                 break;
         }
     }
@@ -282,12 +294,13 @@ export default class Combat extends AbstractScene {
     private begin_battle(): void {
         this.renderer.ready_btn.destroy();
         this.renderer.ready_text.destroy();
-
-        this.renderer.render_entities(this.stage);
         this.renderer.deploy_ui.destroy();
         this.renderer.deploy_ui = null;
+        
         this.input.removeAllListeners();
         this.init_input();
+
+        this.renderer.render_entities(this.stage);
 
         const center_world: Vector = this.renderer.local_to_world(this.stage.get_center());
         this.render_context.camera.pan(center_world.x, center_world.y);
@@ -379,6 +392,7 @@ export default class Combat extends AbstractScene {
 
     private drop_to_lobby(): void {
         if (this.socket) this.socket.removeAllListeners();
+        this.input.removeAllListeners();
 
         this.start('lobby', {
             scene_context: this.scene_context,
