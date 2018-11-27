@@ -39,8 +39,8 @@ export default class Combat extends AbstractScene {
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // redraw unit sprites
-    // apply reverse proxy on server, maybe host client on radbee
     // add tutorial
+    // add catch for players who deploy 0 units
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';
@@ -85,7 +85,7 @@ export default class Combat extends AbstractScene {
         });
 
         this.socket.on('player-readied', (payload: any) => {
-            if (!(this.state === CombatState.DEPLOYMENT_STARTED || this.state === CombatState.DEPLOYMENT_COMPLETE)) return; 
+            if (!(this.state === CombatState.DEPLOYMENT_STARTED || this.state === CombatState.DEPLOYMENT_COMPLETE)) return;
             this.players_ready = payload.players_ready;
         });
 
@@ -107,28 +107,7 @@ export default class Combat extends AbstractScene {
             this.socket.removeAllListeners();
             this.input.removeAllListeners();
 
-            const winning_team: number = payload.winning_team;
-            let completed_string: string = '';
-
-            if (winning_team < 0) {
-                completed_string = 'Tie';
-            } else if (winning_team === this.team) {
-                completed_string = 'You Win';
-            } else {
-                completed_string = 'You Lose';
-            }
-
-            const alpha_fill: Phaser.GameObjects.Graphics = this.add.graphics();
-            alpha_fill.fillStyle(0x000, 0.5);
-            alpha_fill.fillRect(0, 0, this.render_context.width, this.render_context.height);
-            alpha_fill.setScrollFactor(0, 0);
-            alpha_fill.setDepth(this.renderer.overlay_depth);
-
-            const completed_text: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y, completed_string);
-            completed_text.set_font_size(96);
-            completed_text.set_anchor(0.5, 0.5);
-            completed_text.affix_ui();
-            completed_text.set_depth(this.renderer.overlay_depth);
+            this.renderer.render_battle_completed(payload.winning_team);
 
             this.input.once('pointerup', this.drop_to_lobby, this);
         });
@@ -294,7 +273,7 @@ export default class Combat extends AbstractScene {
         this.renderer.ready_text.destroy();
         this.renderer.deploy_ui.destroy();
         this.renderer.deploy_ui = null;
-        
+
         this.input.removeAllListeners();
         this.init_input();
 

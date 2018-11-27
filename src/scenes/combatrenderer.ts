@@ -163,12 +163,24 @@ export default class CombatRenderer {
         const title_size: number = 28;
         const subtitle_size: number = 20;
 
+        const blue_banner: AbstractSprite = this.render_context.add_sprite(0, 0, 'blue_banner');
+        blue_banner.set_scale(this.unit_scalar, this.unit_scalar);
+        blue_banner.set_anchor(0, 0);
+        blue_banner.set_alpha(0.8);
+        blue_banner.affix_ui();
+
         const blue_name_text: AbstractText = this.render_context.add_text(this.render_context.buffer, this.render_context.buffer, is_blue ? this.settings.name : this.settings.opponent);
         blue_name_text.set_font_size(title_size);
         blue_name_text.affix_ui();
         const blue_team_text: AbstractText = this.render_context.add_text(blue_name_text.x, blue_name_text.y + blue_name_text.height + this.render_context.buffer, is_blue ? 'YOU' : 'OPPONENT');
         blue_team_text.set_font_size(subtitle_size);
         blue_team_text.affix_ui();
+
+        const red_banner: AbstractSprite = this.render_context.add_sprite(this.render_context.width, 0, 'red_banner');
+        red_banner.set_scale(this.unit_scalar, this.unit_scalar);
+        red_banner.set_anchor(1, 0);
+        red_banner.set_alpha(0.8);
+        red_banner.affix_ui();
 
         const red_name_text: AbstractText = this.render_context.add_text(this.render_context.width - this.render_context.buffer, this.render_context.buffer, is_blue ? this.settings.opponent : this.settings.name);
         red_name_text.set_font_size(title_size);
@@ -263,6 +275,49 @@ export default class CombatRenderer {
         }
 
         this.timer_text.text = timer.toFixed(2);
+    }
+
+    public render_battle_completed(winning_team: number): void {     
+        let team_string: string;
+        let completed_string: string;
+        let fill_color: any;
+
+        if (winning_team === 0) {
+            team_string = 'Blue Victory';
+            fill_color = 0x1e3359;
+        } else if (winning_team === 1) {
+            team_string = 'Red Victory';
+            fill_color = 0x892727;
+        } else {
+            team_string = 'Draw';
+            fill_color = 0x000;
+        }
+        
+        if (winning_team < 0) {
+            // completed_string = 'Tie';
+        } else if (winning_team === this.settings.team) {
+            completed_string = 'You Win';
+        } else {
+            completed_string = 'You Lose';
+        }
+
+        const alpha_fill: Phaser.GameObjects.Graphics = this.render_context.scene.add.graphics();
+        alpha_fill.fillStyle(fill_color, 0.5);
+        alpha_fill.fillRect(0, 0, this.render_context.width, this.render_context.height);
+        alpha_fill.setScrollFactor(0, 0);
+        alpha_fill.setDepth(this.overlay_depth);
+
+        const title: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, team_string);
+        title.set_font_size(96);
+        title.set_anchor(0.5, 0.5);
+        title.affix_ui();
+        title.set_depth(this.overlay_depth);
+
+        const subtitle: AbstractText = this.render_context.add_text(this.render_context.center_x, title.y + title.height, completed_string);
+        subtitle.set_font_size(72);
+        subtitle.set_anchor(0.5, 0.5);
+        subtitle.affix_ui();
+        subtitle.set_depth(this.overlay_depth);
     }
 
     public update_entity_facing(entity: Entity): void {
