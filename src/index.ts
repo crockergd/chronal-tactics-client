@@ -1,3 +1,4 @@
+const css: any = require('../assets/styles/style.css');
 import AbstractGame from './abstracts/abstractgame';
 
 window.addEventListener('DOMContentLoaded', () => {

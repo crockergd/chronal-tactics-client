@@ -8,7 +8,7 @@ export default class AbstractText {
     public framework_object: GameObjects.Text;
 
     private readonly STYLE: object = {
-        fontFamily: 'Arial',
+        fontFamily: 'silkscreennormal, Arial',
         fontSize: '16px',
         fill: '#fff',
         stroke: '#000',

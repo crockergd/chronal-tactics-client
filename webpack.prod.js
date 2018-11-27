@@ -16,16 +16,40 @@ module.exports = function () {
         },
 
         resolve: {
-            extensions: ['.ts', '.js'],
-            alias: {
-                assets: path.resolve(__dirname, 'assets/')
-            }
+            extensions: ['.ts', '.js']
         },
 
         module: {
             rules: [
-                { type: "javascript/auto", test: /assets(\/|\\)/, loader: 'file-loader?name=assets/[hash].[ext]' },
-                { test: /\.ts$/, loader: 'ts-loader', exclude: '/node_modules/' }
+                {
+                    test: /\.(woff|woff2|eot|ttf)$/,
+                    use: ['url-loader?limit=100000'],
+                    include: [
+                        path.resolve(__dirname, 'assets/fonts')
+                    ]
+                },
+                {
+                    test: /\.css$/,
+                    loader: 'style-loader!css-loader',
+                    include: [
+                        path.resolve(__dirname, 'assets/styles')
+                    ]
+                },
+                {
+                    type: "javascript/auto",
+                    test: /\.(png|json)$/,
+                    loader: 'file-loader?name=assets/[hash].[ext]',
+                    include: [
+                        path.resolve(__dirname, 'assets/')
+                    ]
+                },
+                {
+                    test: /\.ts$/,
+                    loader: 'ts-loader',
+                    include: [
+                        path.resolve(__dirname, 'src/')
+                    ]
+                }
             ]
         },
 

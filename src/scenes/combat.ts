@@ -38,12 +38,8 @@ export default class Combat extends AbstractScene {
     private interval: number = 3;
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
-    // revisit stage centering code and camera bounds, probably have it center on your side on the middle of your team
     // z order units
     // redraw unit sprites
-    // change font
-    // have the time between moves drop each time a unit is killed
-    // display a meter of some kind ticking down the server tick period
     // clean up attack sprites, maybe add red tiles to show attack range
 
     private get players_ready_string(): string {
