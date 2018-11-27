@@ -208,6 +208,9 @@ export default class CombatRenderer {
         this.ready_text.set_font_size(36);
         this.ready_text.set_anchor(0.5, 0.5);
         this.ready_text.affix_ui();
+        
+        const deployment_center: Vector = this.local_to_world(new Vector(this.settings.team === 0 ? 1 : 5, 3));
+        this.render_context.camera.pan(deployment_center.x, deployment_center.y);
     }
 
     public render_deployment_unit(deployment_class: string): void {

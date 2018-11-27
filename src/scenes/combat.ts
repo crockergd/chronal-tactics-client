@@ -288,6 +288,9 @@ export default class Combat extends AbstractScene {
         this.renderer.deploy_ui = null;
         this.input.removeAllListeners();
         this.init_input();
+
+        const center_world: Vector = this.renderer.local_to_world(this.stage.get_center());
+        this.render_context.camera.pan(center_world.x, center_world.y);
     }
 
     private init_input(): void {
