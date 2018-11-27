@@ -4,6 +4,8 @@ import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
 import AbstractGroup from '../abstracts/abstractgroup';
+import ClientSettings from '../utils/clientsettings';
+import CombatRenderer from './combatrenderer';
 
 enum CombatState {
     CREATED,
@@ -14,28 +16,22 @@ enum CombatState {
 }
 
 export default class Combat extends AbstractScene {
+    private renderer: CombatRenderer;
+
     private stage: Stage;
-    private team: number;
     private state: CombatState;
 
     private movement_entity: Entity;
     private movement_x: number;
     private movement_y: number;
 
-    private deploy_stat_text: AbstractText;
-    private ready_stat_text: AbstractText;
-
     private deploy_max: number;
     private deploy_count: number;
-    private deploy_ui: AbstractGroup;
     private deploy_class: string;
     private deploy_position: Vector;
-    private deploy_unit: AbstractSprite;
 
     private players_ready: number = 0;
-
-    private ready_btn: AbstractSprite;
-    private ready_text: AbstractText;
+    private players_max: number = 2;
 
     private packet_resend: number = 1;
     private packet_sent: number = 0;
@@ -43,9 +39,14 @@ export default class Combat extends AbstractScene {
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // revisit stage centering code and camera bounds, probably have it center on your side on the middle of your team
     // z order units
-    // fix issue where client doesnt receive deployment started packet
-    // fix issue where client starts receiving mangled serialized turns and breaks, switch back to production webpack when fixed
-    // investigate ssl connection issues on server
+    // redraw unit sprites
+    // change font
+    // split render state into combatrenderer, generic render code in rendercontext
+    // have the time between moves drop each time a unit is killed
+    // test at different screen sizes, ensure you can place units without ready button getting in the way
+    // send opponents name across, display
+    // display a meter of some kind ticking down the server tick period
+    // clean up attack sprites, maybe add red tiles to show attack range
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';
@@ -56,45 +57,22 @@ export default class Combat extends AbstractScene {
     }
 
     public create(): void {
-        this.events.once('shutdown', () => {
-            if (this.stage) this.stage.destroy();
-            if (this.deploy_stat_text) this.deploy_stat_text.destroy();
-            if (this.ready_stat_text) this.ready_stat_text.destroy();
-            if (this.deploy_ui) this.deploy_ui.destroy();
-            if (this.deploy_unit) this.deploy_unit.destroy();
-            if (this.ready_btn) this.ready_btn.destroy();
-            if (this.ready_text) this.ready_text.destroy();
-
-            this.team = null;
-            this.state = null;
-        }, this);
-
-        this.socket.once('room-closed', () => {
-            this.socket.removeAllListeners();
-
-            this.start('lobby', {
-                scene_context: this.scene_context,
-                socket: this.socket
-            });
-        });
+        this.socket.once('disconnect', () => { this.drop_to_lobby(); });
+        this.socket.once('room-closed', () => { this.drop_to_lobby(); });
 
         this.change_state(CombatState.CREATED);
-        this.team = this.combat_data.team;
+        this.settings.team = this.combat_data.team;
+        this.settings.opponent = this.combat_data.opponent;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
 
-        const bg: AbstractSprite = this.renderer.add_sprite(0, 0, 'gradient');
+        this.renderer = new CombatRenderer(this.render_context, this.settings);
+
+        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient');
         bg.affix_ui();
 
         this.renderer.render_stage(this.stage);
         this.renderer.render_entities(this.stage);
-
-        const name_text: AbstractText = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
-        name_text.set_font_size(28);
-        name_text.affix_ui();
-
-        const team_text: AbstractText = this.renderer.add_text(name_text.x, name_text.y + name_text.height + this.renderer.buffer, 'Team ' + (this.team === 0 ? 'Blue' : 'Red'));
-        team_text.set_font_size(20);
-        team_text.affix_ui();
+        this.renderer.render_team_ui();
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.movement_x = pointer.x;
@@ -108,6 +86,11 @@ export default class Combat extends AbstractScene {
             this.deploy_max = deployment_payload.deployment_max;
             const deployment_tiles: Array<Vector> = deployment_payload.deployment_tiles;
             this.begin_deployment(deployment_tiles);
+        });
+
+        this.socket.on('player-readied', (payload: any) => {
+            if (!(this.state === CombatState.DEPLOYMENT_STARTED || this.state === CombatState.DEPLOYMENT_COMPLETE)) return; 
+            this.players_ready = payload.players_ready;
         });
 
         this.socket.on('battle-started', (payload: any) => {
@@ -136,33 +119,19 @@ export default class Combat extends AbstractScene {
                 completed_string = 'You Lose';
             }
 
-            // const alpha_fill: Phaser.Graphics = this.make.graphics(0, 0);
-            // alpha_fill.beginFill(0x000);
-            // alpha_fill.drawRect(0, 0, this.world.width, this.world.height);
-            // alpha_fill.endFill();
-            // const alpha_fill_sprite: Phaser.Sprite = this.add.sprite(0, 0, alpha_fill.generateTexture());
-            // alpha_fill_sprite.alpha = 0;
-            // alpha_fill_sprite.inputEnabled = true;
-            // this.add.tween(alpha_fill_sprite).to({ alpha: 0.7 }, 1600, Phaser.Easing.Linear.None, true).onComplete.addOnce(() => {
-
             const alpha_fill: Phaser.GameObjects.Graphics = this.add.graphics();
             alpha_fill.fillStyle(0x000, 0.5);
-            alpha_fill.fillRect(0, 0, this.renderer.width, this.renderer.height);
+            alpha_fill.fillRect(0, 0, this.render_context.width, this.render_context.height);
             alpha_fill.setScrollFactor(0, 0);
             alpha_fill.setDepth(3);
 
-            const completed_text: AbstractText = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y, completed_string);
+            const completed_text: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y, completed_string);
             completed_text.set_font_size(96);
             completed_text.set_anchor(0.5, 0.5);
             completed_text.affix_ui();
             completed_text.framework_object.setDepth(3);
 
-            this.input.once('pointerup', () => {
-                this.start('lobby', {
-                    scene_context: this.scene_context,
-                    socket: this.socket
-                });
-            }, this);
+            this.input.once('pointerup', this.drop_to_lobby, this);
         });
 
         this.socket.on('post-tick', (data: any) => {
@@ -178,7 +147,7 @@ export default class Combat extends AbstractScene {
                 }
             }
 
-            this.scene_context.renderer.render_turn(this.stage.battle.get_last_turn());
+            this.renderer.render_turn(this.stage.battle.get_last_turn());
         });
 
         this.ready_packet();
@@ -208,8 +177,9 @@ export default class Combat extends AbstractScene {
 
         switch (this.state) {
             case CombatState.DEPLOYMENT_STARTED:
-                if (this.ready_stat_text.text !== this.players_ready_string) this.ready_stat_text.text = this.players_ready_string;
-                if (this.deploy_stat_text.text !== this.units_deployed_string) this.deploy_stat_text.text = this.units_deployed_string;
+            case CombatState.DEPLOYMENT_COMPLETE:
+                if (this.renderer.ready_stat_text.text !== this.players_ready_string) this.renderer.ready_stat_text.text = this.players_ready_string;
+                if (this.renderer.deploy_stat_text.text !== this.units_deployed_string) this.renderer.deploy_stat_text.text = this.units_deployed_string;
                 break;
         }
     }
@@ -235,66 +205,17 @@ export default class Combat extends AbstractScene {
     }
 
     private begin_deployment(deployment_tiles: Array<Vector>): void {
-        this.deploy_ui = this.renderer.add_group();
+        this.renderer.render_deployment_ui(deployment_tiles);
+
         this.deploy_count = 0;
 
-        this.ready_stat_text = this.renderer.add_text(this.renderer.width - this.renderer.buffer, this.renderer.buffer, 'Players Ready: ' + 0 + ' / ' + 2, this.deploy_ui);
-        this.ready_stat_text.set_font_size(20);
-        this.ready_stat_text.affix_ui();
-        this.ready_stat_text.set_anchor(1, 0);
-
-        this.deploy_stat_text = this.renderer.add_text(this.ready_stat_text.x, this.ready_stat_text.y + this.ready_stat_text.height + this.renderer.buffer, 'Units Deployed: ' + this.deploy_count + ' / ' + this.deploy_max, this.deploy_ui);
-        this.deploy_stat_text.set_font_size(20);
-        this.deploy_stat_text.affix_ui();
-        this.deploy_stat_text.set_anchor(1, 0);
-
-        for (const deployment_tile of deployment_tiles) {
-            const world: Vector = this.renderer.local_to_world(deployment_tile);
-            const tile_sprite: AbstractSprite = this.renderer.add_sprite(world.x, world.y, 'deploy_tile', this.deploy_ui);
-            tile_sprite.set_scale(this.renderer.tile_scalar, this.renderer.tile_scalar);
-            tile_sprite.set_anchor(0.5, 0.25);
-        }
-
-        const unit_frame: AbstractSprite = this.renderer.add_sprite(this.renderer.width, this.renderer.height, 'unit_frame', this.deploy_ui);
-        unit_frame.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
-        unit_frame.set_anchor(1, 1);
-        unit_frame.set_position(unit_frame.x, unit_frame.y - (unit_frame.height / 2));
-        unit_frame.affix_ui();
-
-        const class_keys: Array<string> = ['sword_unit', 'spear_unit', 'bow_unit'];
-
-        let index: number = 0;
-        for (const class_key of class_keys) {
-            const sprite: AbstractSprite = this.renderer.add_sprite(unit_frame.x, unit_frame.y - (unit_frame.height / 2), class_key, this.deploy_ui);
-            sprite.set_frame(this.team === 0 ? 1 : 10);
-            sprite.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
-            sprite.set_anchor(1, 0.5);
-            sprite.set_position(sprite.x - (((sprite.width + this.renderer.buffer) * index) + sprite.width / 2), sprite.y);
-            sprite.affix_ui();
-
+        for (const sprite of this.renderer.deploy_classes) {
             sprite.on('pointerdown', () => {
                 if (this.deploy_count >= this.deploy_max) return;
 
-                this.deploy_class = class_key;
-
-                if (this.deploy_unit) {
-                    this.deploy_unit.destroy();
-                    this.deploy_unit = null;
-                }
-                this.deploy_unit = this.renderer.add_sprite(0, 0, this.deploy_class, this.deploy_ui);
-                this.deploy_unit.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
-                this.deploy_unit.set_anchor(0.5, 1);
-                this.deploy_unit.set_visible(false);
-
-                if (this.team === 0) {
-                    this.deploy_unit.play('idle_backward_' + this.deploy_class + '_blue');
-                    this.deploy_unit.framework_object.flipX = true;
-                } else {
-                    this.deploy_unit.play('idle_forward_' + this.deploy_class + '_red');
-                }
+                this.deploy_class = sprite.key;
+                this.renderer.render_deployment_unit(this.deploy_class);
             }, this);
-
-            index++;
         }
 
         this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
@@ -304,19 +225,19 @@ export default class Combat extends AbstractScene {
 
             const local_pos: Vector = this.renderer.world_to_local(new Vector(pointer.worldX, pointer.worldY));
             if (!this.renderer.local_within_specific(local_pos, deployment_tiles)) {
-                this.deploy_unit.set_visible(false);
+                this.renderer.deploy_unit.set_visible(false);
                 return;
             }
 
             if (this.stage.get_entity_by_position(local_pos)) {
-                this.deploy_unit.set_visible(false);
+                this.renderer.deploy_unit.set_visible(false);
                 return;
             }
 
             this.deploy_position = new Vector(local_pos.x, local_pos.y);
             const world_pos: Vector = this.renderer.local_to_world(local_pos);
-            this.deploy_unit.set_position(world_pos.x, world_pos.y + this.renderer.entity_adjust_y);
-            this.deploy_unit.set_visible(true);
+            this.renderer.deploy_unit.set_position(world_pos.x, world_pos.y + this.renderer.entity_adjust_y);
+            this.renderer.deploy_unit.set_visible(true);
         }, this);
 
         this.input.on('pointerup', () => {
@@ -343,17 +264,7 @@ export default class Combat extends AbstractScene {
             this.clear_deployment();
         });
 
-        this.ready_btn = this.renderer.add_sprite(this.renderer.center_x, this.renderer.height, 'generic_btn');
-        this.ready_btn.set_scale(2, 2);
-        this.ready_btn.set_position(this.ready_btn.x, this.ready_btn.y - (this.ready_btn.height * 2));
-        this.ready_btn.affix_ui();
-
-        this.ready_text = this.renderer.add_text(this.ready_btn.x, this.ready_btn.y, 'Ready');
-        this.ready_text.set_font_size(36);
-        this.ready_text.set_anchor(0.5, 0.5);
-        this.ready_text.affix_ui();
-
-        this.ready_btn.once('pointerup', () => {
+        this.renderer.ready_btn.once('pointerup', () => {
             this.change_state(CombatState.DEPLOYMENT_COMPLETE);
             this.ready_packet();
         }, this);
@@ -362,19 +273,19 @@ export default class Combat extends AbstractScene {
     private clear_deployment(): void {
         this.deploy_position = null;
         this.deploy_class = null;
-        if (this.deploy_unit) {
-            this.deploy_unit.destroy();
-            this.deploy_unit = null;
+        if (this.renderer.deploy_unit) {
+            this.renderer.deploy_unit.destroy();
+            this.renderer.deploy_unit = null;
         }
     }
 
     private begin_battle(): void {
-        this.ready_btn.destroy();
-        this.ready_text.destroy();
+        this.renderer.ready_btn.destroy();
+        this.renderer.ready_text.destroy();
 
         this.renderer.render_entities(this.stage);
-        this.deploy_ui.destroy();
-        this.deploy_ui = null;
+        this.renderer.deploy_ui.destroy();
+        this.renderer.deploy_ui = null;
         this.input.removeAllListeners();
         this.init_input();
     }
@@ -385,7 +296,7 @@ export default class Combat extends AbstractScene {
             this.movement_y = pointer.y;
 
             for (const entity of this.stage.entities) {
-                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.renderer.camera).length) {
+                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.render_context.camera).length) {
                     this.movement_entity = entity;
                     return;
                 }
@@ -421,7 +332,7 @@ export default class Combat extends AbstractScene {
                 this.movement_entity.set('facing_sprite', null);
             }
 
-            const facing_sprite: AbstractSprite = this.renderer.add_sprite(this.movement_entity.get('sprite').x, this.movement_entity.get('sprite').y, 'directional_ring');
+            const facing_sprite: AbstractSprite = this.render_context.add_sprite(this.movement_entity.get('sprite').x, this.movement_entity.get('sprite').y, 'directional_ring');
             facing_sprite.set_scale(this.renderer.unit_scalar, this.renderer.unit_scalar);
             facing_sprite.set_anchor(0.5, 0.4);
             facing_sprite.set_depth(this.renderer.facing_depth);
@@ -454,12 +365,21 @@ export default class Combat extends AbstractScene {
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
 
-            this.renderer.camera.setScroll(this.renderer.camera.scrollX + scroll_x, this.renderer.camera.scrollY + scroll_y);
+            this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
         }, this);
     }
 
     private change_state(state: CombatState): void {
         // console.log('State changed from ' + this.state + ' to ' + state + '.');
         this.state = state;
+    }
+
+    private drop_to_lobby(): void {
+        if (this.socket) this.socket.removeAllListeners();
+
+        this.start('lobby', {
+            scene_context: this.scene_context,
+            socket: this.socket
+        });
     }
 }

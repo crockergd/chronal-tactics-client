@@ -10,12 +10,12 @@ export default class Boot extends AbstractScene {
     private firstnames: Array<string>;
 
     public preload(): void {
-        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Tactics');
+        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_anchor(0.5, 0.5);
 
-        this.subtitle = this.renderer.add_text(this.cameras.main.width - this.renderer.buffer, this.renderer.buffer, '');
+        this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
 
         this.load.on('progress', (percentage: number) => {
@@ -63,7 +63,7 @@ export default class Boot extends AbstractScene {
         this.load.json('adjectives', require_json('./adjectives.json'));
         this.load.json('firstnames', require_json('./firstnames.json'));
 
-        const gradient_texture: Phaser.Textures.CanvasTexture = this.textures.createCanvas('gradient', this.renderer.width * 2, this.renderer.height * 2);
+        const gradient_texture: Phaser.Textures.CanvasTexture = this.textures.createCanvas('gradient', this.render_context.width * 2, this.render_context.height * 2);
         const gradient_context: CanvasRenderingContext2D = gradient_texture.getContext();
         const gradient: CanvasGradient = gradient_context.createLinearGradient(gradient_texture.width / 2, 0, gradient_texture.width / 2, gradient_texture.height);
 

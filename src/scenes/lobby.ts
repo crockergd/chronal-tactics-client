@@ -22,39 +22,29 @@ export default class Lobby extends AbstractScene {
     }
 
     public create(): void {
-        this.events.once('shutdown', () => {
-            if (this.title) this.title.destroy();
-            if (this.subtitle) this.subtitle.destroy();
-            if (this.footer) this.footer.destroy();
-            if (this.name) this.name.destroy();
-
-            this.state = null;
-            this.matchmaking_started = null;
-        }, this);
-
         this.state = LobbyState.IDLE;
 
-        this.title = this.renderer.add_text(this.renderer.center_x, this.renderer.center_y - this.renderer.height / 16, 'Isochronal Tactics');
+        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_anchor(0.5, 0.5);
 
-        this.subtitle = this.renderer.add_text(this.cameras.main.width - this.renderer.buffer, this.renderer.buffer, '');
+        this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
 
-        this.footer = this.renderer.add_text(this.renderer.center_x, this.renderer.height, '');
+        this.footer = this.render_context.add_text(this.render_context.center_x, this.render_context.height, '');
         this.footer.set_font_size(24);
         this.footer.set_anchor(0.5, 1);
-        this.footer.set_position(this.footer.x, this.footer.y - ((this.footer.height * 2) + this.renderer.buffer));
+        this.footer.set_position(this.footer.x, this.footer.y - ((this.footer.height * 2) + this.render_context.buffer));
 
-        this.name = this.renderer.add_text(this.renderer.buffer, this.renderer.buffer, this.settings.name);
+        this.name = this.render_context.add_text(this.render_context.buffer, this.render_context.buffer, this.settings.name);
         this.name.set_font_size(28);
 
-        const connect_btn: AbstractSprite = this.renderer.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
+        const connect_btn: AbstractSprite = this.render_context.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
         connect_btn.set_scale(2.0, 2.0);
         connect_btn.set_position(connect_btn.x, connect_btn.y - (connect_btn.height * 2));
 
-        const connect_text: AbstractText = this.renderer.add_text(connect_btn.x, connect_btn.y, 'Play');
+        const connect_text: AbstractText = this.render_context.add_text(connect_btn.x, connect_btn.y, 'Play');
         connect_text.set_font_size(36);
         connect_text.set_anchor(0.5, 0.5);
 
@@ -104,7 +94,7 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio('https://radbee.me:3010');
-        // this.socket = Sio('localhost:3010');
+        // this.socket = Sio('https://radbee.me:3010');
+        this.socket = Sio('localhost:3010');
     }
 }

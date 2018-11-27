@@ -39,6 +39,10 @@ export default class AbstractSprite {
         return this.framework_object.displayHeight; // / this.renderer.DPR;
     }
 
+    get key(): string {
+        return this.framework_object.texture.key;
+    }
+
     public set_position(x: number, y: number): void {
         this.framework_object.setPosition(x, y);
     }

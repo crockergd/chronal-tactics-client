@@ -3,13 +3,13 @@ import AbstractScene from '../abstracts/abstractscene';
 import ClientSettings from '../utils/clientsettings';
 
 export default class SceneContext {
-    private readonly render_context: RenderContext;
+    private readonly _render_context: RenderContext;
     private scene: AbstractScene;
 
     private client_settings: ClientSettings;
 
-    public get renderer(): RenderContext {
-        return this.render_context;
+    public get render_context(): RenderContext {
+        return this._render_context;
     }
 
     public get settings(): ClientSettings {
@@ -17,7 +17,7 @@ export default class SceneContext {
     }
 
     constructor() {
-        this.render_context = new RenderContext();
+        this._render_context = new RenderContext();
 
         this.client_settings = { };
     }

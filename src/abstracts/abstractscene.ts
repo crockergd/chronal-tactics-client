@@ -8,12 +8,16 @@ export default class AbstractScene extends Scene {
     protected socket: SocketIOClient.Socket;
     protected combat_data: any;
 
-    public get renderer(): RenderContext {
-        return this.scene_context.renderer;
+    public get render_context(): RenderContext {
+        return this.scene_context.render_context;
     }
 
     public get settings(): ClientSettings {
         return this.scene_context.settings;
+    }
+
+    public get team(): number {
+        return this.scene_context.settings.team;
     }
 
     public init(data: any) {
