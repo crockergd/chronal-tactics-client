@@ -11,11 +11,11 @@ export default class CombatRenderer {
     public container: AbstractContainer;
     public tile_width: number;
     public tile_height: number;
-    
+
     public deploy_ui: AbstractGroup;
     public deploy_unit: AbstractSprite;
     public deploy_classes: Array<AbstractSprite>;
-    public deploy_stat_text: AbstractText;    
+    public deploy_stat_text: AbstractText;
     public ready_stat_text: AbstractText;
     public ready_btn: AbstractSprite;
     public ready_text: AbstractText;
@@ -41,7 +41,11 @@ export default class CombatRenderer {
         return 1;
     }
 
-    constructor(private readonly render_context: RenderContext, private readonly settings: ClientSettings) {
+    public get overlay_depth(): number {
+        return this.unit_depth + this.extent;
+    }
+
+    constructor(private readonly render_context: RenderContext, private readonly settings: ClientSettings, private readonly extent: number) {
         this.deploy_classes = new Array<AbstractSprite>();
     }
 
@@ -76,6 +80,11 @@ export default class CombatRenderer {
         }
     }
 
+    public update_depth(entities: Array<Entity>): void {
+        for (const entity of entities) {
+            entity.get('sprite').set_depth(this.unit_depth + entity.spatial.position.y);
+        }
+    }
 
     public render_stage(stage: Stage): void {
         this.container = this.render_context.add_container(0, 0);
@@ -208,7 +217,7 @@ export default class CombatRenderer {
         this.ready_text.set_font_size(36);
         this.ready_text.set_anchor(0.5, 0.5);
         this.ready_text.affix_ui();
-        
+
         const deployment_center: Vector = this.local_to_world(new Vector(this.settings.team === 0 ? 1 : 5, 3));
         this.render_context.camera.pan(deployment_center.x, deployment_center.y);
     }

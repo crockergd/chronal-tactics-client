@@ -24,6 +24,9 @@ export default class Lobby extends AbstractScene {
     public create(): void {
         this.state = LobbyState.IDLE;
 
+        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient');
+        bg.affix_ui();
+
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);

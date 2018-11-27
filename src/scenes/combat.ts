@@ -38,9 +38,9 @@ export default class Combat extends AbstractScene {
     private interval: number = 3;
 
     // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
-    // z order units
     // redraw unit sprites
     // clean up attack sprites, maybe add red tiles to show attack range
+    // apply reverse proxy on server, maybe host client on radbee
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';
@@ -61,7 +61,7 @@ export default class Combat extends AbstractScene {
         this.settings.opponent = this.combat_data.opponent;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
 
-        this.renderer = new CombatRenderer(this.render_context, this.settings);
+        this.renderer = new CombatRenderer(this.render_context, this.settings, this.stage.height);
 
         const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient');
         bg.affix_ui();
@@ -122,13 +122,13 @@ export default class Combat extends AbstractScene {
             alpha_fill.fillStyle(0x000, 0.5);
             alpha_fill.fillRect(0, 0, this.render_context.width, this.render_context.height);
             alpha_fill.setScrollFactor(0, 0);
-            alpha_fill.setDepth(3);
+            alpha_fill.setDepth(this.renderer.overlay_depth);
 
             const completed_text: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y, completed_string);
             completed_text.set_font_size(96);
             completed_text.set_anchor(0.5, 0.5);
             completed_text.affix_ui();
-            completed_text.framework_object.setDepth(3);
+            completed_text.set_depth(this.renderer.overlay_depth);
 
             this.input.once('pointerup', this.drop_to_lobby, this);
         });
@@ -147,6 +147,7 @@ export default class Combat extends AbstractScene {
             }
 
             this.renderer.render_turn(this.stage.battle.get_last_turn());
+            this.renderer.update_depth(this.stage.entities);
 
             this.interval = payload.interval;
             this.timer = this.interval;
@@ -268,6 +269,7 @@ export default class Combat extends AbstractScene {
             this.deploy_count++;
 
             this.renderer.render_entities(this.stage);
+            this.renderer.update_depth(this.stage.entities);
 
             this.clear_deployment();
         });
