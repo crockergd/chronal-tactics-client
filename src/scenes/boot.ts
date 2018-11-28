@@ -53,8 +53,8 @@ export default class Boot extends AbstractScene {
         this.load.spritesheet('attack_effect', require_tilesheet('./attack_effect.png'), { frameWidth: 30, frameHeight: 30 });
 
         this.load.image('base_tile', require_image('./base_tile.png'));
-        this.load.image('deploy_tile', require_image('./deploy_tile.png'));
-        this.load.image('attack_tile', require_image('./attack_tile.png'));
+        this.load.image('blue_tile', require_image('./blue_tile.png'));
+        this.load.image('red_tile', require_image('./red_tile.png'));
         this.load.image('generic_btn', require_image('./generic_btn.png'));
         this.load.image('unit_frame', require_image('./unit_frame.png'));
         this.load.image('red_banner', require_image('./red_banner.png'));

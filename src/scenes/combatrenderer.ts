@@ -250,7 +250,8 @@ export default class CombatRenderer {
 
         for (const deployment_tile of deployment_tiles) {
             const world: Vector = this.local_to_world(deployment_tile);
-            const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'deploy_tile', this.deploy_ui);
+            const tile_key: string = this.settings.team === 0 ? 'blue_tile': 'red_tile';
+            const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, tile_key, this.deploy_ui);
             tile_sprite.set_scale(this.tile_scalar, this.tile_scalar);
             tile_sprite.set_anchor(0.5, 0.25);
         }
