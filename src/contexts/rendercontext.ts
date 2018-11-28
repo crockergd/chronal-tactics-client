@@ -57,13 +57,13 @@ export default class RenderContext {
         return group;
     }
 
-    public add_sprite(x: number, y: number, key: string, container?: AbstractContainer | AbstractGroup): AbstractSprite {
+    public add_sprite(x: number, y: number, key: string, container?: AbstractContainer | AbstractGroup | Array<any>): AbstractSprite {
         const sprite_object: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, container);
 
         return sprite_object;
     }
 
-    public add_text(x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup): AbstractText {
+    public add_text(x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup | Array<any>): AbstractText {
         const text_object: AbstractText = new AbstractText(this, this.scene, x, y, text, container);
 
         return text_object;

@@ -203,6 +203,8 @@ export default class Combat extends AbstractScene {
 
                 this.deploy_class = sprite.key;
                 this.renderer.render_deployment_unit(this.deploy_class);
+
+                this.renderer.display_deployment_ui(false);
             }, this);
         }
 
@@ -213,11 +215,13 @@ export default class Combat extends AbstractScene {
 
             const local_pos: Vector = this.renderer.world_to_local(new Vector(pointer.worldX, pointer.worldY));
             if (!this.renderer.local_within_specific(local_pos, deployment_tiles)) {
+                // this.renderer.deploy_unit.set_visible(true);
+                // this.renderer.deploy_unit.set_position(pointer.worldX, pointer.worldY + this.renderer.entity_adjust_y);
                 this.renderer.deploy_unit.set_visible(false);
                 return;
             }
 
-            if (this.stage.get_entity_by_position(local_pos)) {
+            if (this.stage.get_entity_by_position(local_pos)) {  
                 this.renderer.deploy_unit.set_visible(false);
                 return;
             }
@@ -265,14 +269,14 @@ export default class Combat extends AbstractScene {
         if (this.renderer.deploy_unit) {
             this.renderer.deploy_unit.destroy();
             this.renderer.deploy_unit = null;
+
+            this.renderer.display_deployment_ui(true);
+
         }
     }
 
     private begin_battle(): void {
-        this.renderer.ready_btn.destroy();
-        this.renderer.ready_text.destroy();
-        this.renderer.deploy_ui.destroy();
-        this.renderer.deploy_ui = null;
+        this.renderer.destroy_deployment_ui();
 
         this.input.removeAllListeners();
         this.init_input();

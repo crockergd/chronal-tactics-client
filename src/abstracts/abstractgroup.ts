@@ -17,6 +17,13 @@ export default class AbstractGroup {
         this.framework_object.add(child.framework_object);
     }
 
+    
+    public set_depth(depth: number): void {
+        for (const child of this.framework_object.getChildren()) {
+            if ((child as any).setDepth) (child as any).setDepth(depth);
+        }       
+    }
+
     public destroy(): void {
         if (this.framework_object) {
             this.framework_object.destroy(true);

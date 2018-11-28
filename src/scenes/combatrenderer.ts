@@ -5,14 +5,17 @@ import AbstractContainer from '../abstracts/abstractcontainer';
 import AbstractText from '../abstracts/abstracttext';
 import ClientSettings from '../utils/clientsettings';
 import AbstractSprite from '../abstracts/abstractsprite';
-import AbstractGroup from '../abstracts/abstractgroup';
+import { AbstractType } from '../abstracts/abstracttype';
 
 export default class CombatRenderer {
     public container: AbstractContainer;
     public tile_width: number;
     public tile_height: number;
 
-    public deploy_ui: AbstractGroup;
+    public unit_frame_pos: Vector;
+    public unit_frame: AbstractSprite;
+    public unit_ui: AbstractContainer;
+    public deploy_ui: Array<AbstractType>;
     public deploy_unit: AbstractSprite;
     public deploy_classes: Array<AbstractSprite>;
     public deploy_stat_text: AbstractText;
@@ -48,6 +51,7 @@ export default class CombatRenderer {
 
     constructor(private readonly render_context: RenderContext, private readonly settings: ClientSettings, private readonly extent: number) {
         this.deploy_classes = new Array<AbstractSprite>();
+        this.deploy_ui = new Array<AbstractSprite | AbstractText>();
     }
 
     public render_turn(resolubles: Array<Resoluble>): void {
@@ -193,26 +197,22 @@ export default class CombatRenderer {
     }
 
     public render_deployment_ui(deployment_tiles: Array<Vector>): void {
-        this.deploy_ui = this.render_context.add_group();
+        this.unit_ui = this.render_context.add_container(0, 0);
+        this.deploy_ui.push(this.unit_ui);
 
-        for (const deployment_tile of deployment_tiles) {
-            const world: Vector = this.local_to_world(deployment_tile);
-            const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'deploy_tile', this.deploy_ui);
-            tile_sprite.set_scale(this.tile_scalar, this.tile_scalar);
-            tile_sprite.set_anchor(0.5, 0.25);
-        }
+        this.unit_frame = this.render_context.add_sprite(0, 0, 'unit_frame', this.unit_ui);
+        this.unit_frame.set_scale(this.unit_scalar, this.unit_scalar);
+        this.unit_frame.set_anchor(1, 1);
+        this.unit_frame.affix_ui();
 
-        const unit_frame: AbstractSprite = this.render_context.add_sprite(this.render_context.width, this.render_context.height, 'unit_frame', this.deploy_ui);
-        unit_frame.set_scale(this.unit_scalar, this.unit_scalar);
-        unit_frame.set_anchor(1, 1);
-        unit_frame.set_position(unit_frame.x, unit_frame.y - (unit_frame.height / 2));
-        unit_frame.affix_ui();
+        this.unit_frame_pos = new Vector(this.render_context.width, this.render_context.height - (this.unit_frame.height / 2));
+        this.unit_ui.set_position(this.unit_frame_pos.x, this.unit_frame_pos.y);
 
         const class_keys: Array<string> = ['sword_unit', 'spear_unit', 'bow_unit'];
 
         let index: number = 0;
         for (const class_key of class_keys) {
-            const sprite: AbstractSprite = this.render_context.add_sprite(unit_frame.x, unit_frame.y - (unit_frame.height / 2), class_key, this.deploy_ui);
+            const sprite: AbstractSprite = this.render_context.add_sprite(this.unit_frame.x, this.unit_frame.y - (this.unit_frame.height / 2), class_key, this.unit_ui);
             sprite.set_frame(this.settings.team === 0 ? 1 : 10);
             sprite.set_scale(this.unit_scalar, this.unit_scalar);
             sprite.set_anchor(1, 0.5);
@@ -234,18 +234,57 @@ export default class CombatRenderer {
         this.deploy_stat_text.affix_ui();
         this.deploy_stat_text.set_anchor(0.5, 0);
 
-        this.ready_btn = this.render_context.add_sprite(this.render_context.center_x, this.render_context.height, 'generic_btn');
+        this.ready_btn = this.render_context.add_sprite(this.render_context.center_x, this.render_context.height, 'generic_btn', this.deploy_ui);
         this.ready_btn.set_scale(2, 2);
         this.ready_btn.set_position(this.ready_btn.x, this.ready_btn.y - (this.ready_btn.height * 2));
         this.ready_btn.affix_ui();
 
-        this.ready_text = this.render_context.add_text(this.ready_btn.x, this.ready_btn.y, 'Ready');
+        this.ready_text = this.render_context.add_text(this.ready_btn.x, this.ready_btn.y, 'Ready', this.deploy_ui);
         this.ready_text.set_font_size(36);
         this.ready_text.set_anchor(0.5, 0.5);
         this.ready_text.affix_ui();
 
+        for (const ui of this.deploy_ui) {
+            ui.set_depth(this.overlay_depth);
+        }
+
+        for (const deployment_tile of deployment_tiles) {
+            const world: Vector = this.local_to_world(deployment_tile);
+            const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'deploy_tile', this.deploy_ui);
+            tile_sprite.set_scale(this.tile_scalar, this.tile_scalar);
+            tile_sprite.set_anchor(0.5, 0.25);
+        }
+
         const deployment_center: Vector = this.local_to_world(new Vector(this.settings.team === 0 ? 1 : 5, 3));
         this.render_context.camera.pan(deployment_center.x, deployment_center.y);
+    }
+
+    public display_deployment_ui(show: boolean): void {
+        this.ready_btn.set_visible(show);
+        this.ready_text.set_visible(show);
+        if (!show) {
+            this.render_context.scene.tweens.add({
+                targets: this.unit_ui.framework_object,
+                x: this.unit_frame_pos.x + (this.unit_frame.width - (this.render_context.buffer * 2)),
+                duration: 600,
+                ease: 'Power2'
+            });
+        } else {
+            this.render_context.scene.tweens.add({
+                targets: this.unit_ui.framework_object,
+                x: this.unit_frame_pos.x,
+                duration: 600,
+                ease: 'Power2'
+            });
+        }
+    }
+
+    public destroy_deployment_ui(): void {
+        this.ready_btn.destroy();
+        this.ready_text.destroy();
+        for (const ui of this.deploy_ui) {
+            if (ui) ui.destroy();
+        }
     }
 
     public render_deployment_unit(deployment_class: string): void {
@@ -277,7 +316,7 @@ export default class CombatRenderer {
         this.timer_text.text = timer.toFixed(2);
     }
 
-    public render_battle_completed(winning_team: number): void {     
+    public render_battle_completed(winning_team: number): void {
         let team_string: string;
         let completed_string: string;
         let fill_color: any;
@@ -292,7 +331,7 @@ export default class CombatRenderer {
             team_string = 'Draw';
             fill_color = 0x000;
         }
-        
+
         if (winning_team < 0) {
             // completed_string = 'Tie';
         } else if (winning_team === this.settings.team) {

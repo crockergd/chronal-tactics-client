@@ -30,11 +30,15 @@ export default class AbstractContainer {
         this.framework_object.setPosition(x, y);
     }
 
+    public set_depth(depth: number): void {
+        this.framework_object.setDepth(depth);
+    }
+
     public add(child: AbstractSprite | AbstractText): void {
         this.framework_object.add(child.framework_object);
     }
 
-    public clear(): void {
+    public destroy(): void {
         this.framework_object.destroy();
     }
 }

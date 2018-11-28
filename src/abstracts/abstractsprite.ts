@@ -8,14 +8,18 @@ export default class AbstractSprite {
     private renderer: RenderContext;
     public framework_object: GameObjects.Sprite;
 
-    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, container?: AbstractContainer | AbstractGroup) {
+    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, container?: AbstractContainer | AbstractGroup | Array<any>) {
         this.renderer = renderer;
         this.framework_object = scene.add.sprite(x, y, key);
 
         if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
 
         if (container) {
-            container.add(this);
+            if (Array.isArray(container)) {
+                container.push(this);
+            } else {
+                container.add(this);
+            }
         }
     }
 

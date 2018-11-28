@@ -15,7 +15,7 @@ export default class AbstractText {
         strokeThickness: 2
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup) {
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup| Array<any>) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         // this.framework_object.lineSpacing = -4;
@@ -23,7 +23,11 @@ export default class AbstractText {
         if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
 
         if (container) {
-            container.add(this);
+            if (Array.isArray(container)) {
+                container.push(this);
+            } else {
+                container.add(this);
+            }
         }
     }
 
@@ -77,6 +81,10 @@ export default class AbstractText {
 
     public set_depth(depth: number): void {
         this.framework_object.setDepth(depth);
+    }
+
+    public set_visible(visible: boolean): void {
+        this.framework_object.visible = visible;
     }
 
     public affix_ui(): void {
