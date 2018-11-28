@@ -198,13 +198,15 @@ export default class Combat extends AbstractScene {
         this.deploy_count = 0;
 
         for (const sprite of this.renderer.deploy_classes) {
-            sprite.on('pointerdown', () => {
+            sprite.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
                 if (this.deploy_count >= this.deploy_max) return;
 
                 this.deploy_class = sprite.key;
                 this.renderer.render_deployment_unit(this.deploy_class);
 
                 this.renderer.display_deployment_ui(false);
+                this.renderer.deploy_unit.set_visible(true);
+                this.renderer.deploy_unit.set_position(pointer.worldX, pointer.worldY + this.renderer.entity_adjust_y);
             }, this);
         }
 
@@ -215,9 +217,9 @@ export default class Combat extends AbstractScene {
 
             const local_pos: Vector = this.renderer.world_to_local(new Vector(pointer.worldX, pointer.worldY));
             if (!this.renderer.local_within_specific(local_pos, deployment_tiles)) {
-                // this.renderer.deploy_unit.set_visible(true);
-                // this.renderer.deploy_unit.set_position(pointer.worldX, pointer.worldY + this.renderer.entity_adjust_y);
-                this.renderer.deploy_unit.set_visible(false);
+                this.renderer.deploy_unit.set_visible(true);
+                this.renderer.deploy_unit.set_position(pointer.worldX, pointer.worldY + this.renderer.entity_adjust_y);
+                // this.renderer.deploy_unit.set_visible(false);
                 return;
             }
 
@@ -282,6 +284,7 @@ export default class Combat extends AbstractScene {
         this.init_input();
 
         this.renderer.render_entities(this.stage);
+        this.renderer.update_depth(this.stage.entities);
 
         const center_world: Vector = this.renderer.local_to_world(this.stage.get_center());
         this.render_context.camera.pan(center_world.x, center_world.y);
@@ -362,7 +365,7 @@ export default class Combat extends AbstractScene {
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
 
-            this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
+            // this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
         }, this);
     }
 
