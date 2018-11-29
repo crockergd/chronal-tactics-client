@@ -46,12 +46,21 @@ export default class Lobby extends AbstractScene {
 
         const connect_btn: AbstractSprite = this.render_context.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
         connect_btn.set_scale(2.0, 2.0);
-        connect_btn.set_position(connect_btn.x, connect_btn.y - (connect_btn.height * 2));
+        connect_btn.set_position(connect_btn.x + ((connect_btn.width / 2) + (this.render_context.buffer * 2)), connect_btn.y - (connect_btn.height * 2));
 
         const connect_text: AbstractText = this.render_context.add_text(connect_btn.x, connect_btn.y, 'Play');
         connect_text.set_font_size(36);
         connect_text.set_anchor(0.5, 0.5);
         connect_text.set_stroke(4);
+
+        const training_btn: AbstractSprite = this.render_context.add_sprite(this.footer.x, connect_btn.y, 'generic_btn');
+        training_btn.set_scale(2.0, 2.0);
+        training_btn.set_position(training_btn.x - ((training_btn.width / 2) + (this.render_context.buffer * 2)), training_btn.y);
+
+        const training_text: AbstractText = this.render_context.add_text(training_btn.x, training_btn.y, 'Training');
+        training_text.set_font_size(36);
+        training_text.set_anchor(0.5, 0.5);
+        training_text.set_stroke(4);
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {
@@ -62,7 +71,7 @@ export default class Lobby extends AbstractScene {
 
                 this.footer.text = 'Matchmaking...';
 
-                this.socket.once('matched', (payload: any) => {    
+                this.socket.once('matched', (payload: any) => {
                     this.start('combat', {
                         scene_context: this.scene_context,
                         socket: this.socket,
@@ -71,8 +80,34 @@ export default class Lobby extends AbstractScene {
                 });
 
                 this.socket.emit('matchmake', {
-                    name: this.settings.name,
-                    units: this.settings.units
+                    name: this.settings.name
+                });
+
+                this.matchmaking_started = new Date();
+
+                this.state = LobbyState.MATCHMAKING;
+            }
+        });
+
+        training_btn.on('pointerup', () => {
+            if (this.state === LobbyState.IDLE) {
+                if (!this.connected) {
+                    this.footer.text = 'Can\'t Connect to Server';
+                    return;
+                }
+
+                this.footer.text = 'Matchmaking...';
+
+                this.socket.once('matched', (payload: any) => {
+                    this.start('combat', {
+                        scene_context: this.scene_context,
+                        socket: this.socket,
+                        combat_data: payload
+                    });
+                });
+
+                this.socket.emit('matchmake_training', {
+                    name: this.settings.name
                 });
 
                 this.matchmaking_started = new Date();

@@ -29,7 +29,7 @@ export default class Combat extends AbstractScene {
     private deploy_position: Vector;
 
     private players_ready: number;
-    private players_max: number = 2;
+    private players_max: number;
 
     private packet_resend: number = 1;
     private packet_sent: number = 0;
@@ -41,7 +41,7 @@ export default class Combat extends AbstractScene {
     // add tutorial
 
     private get players_ready_string(): string {
-        return 'Players Ready: ' + this.players_ready + ' / 2';
+        return 'Players Ready: ' + this.players_ready + ' / ' + this.players_max;
     }
 
     private get units_deployed_string(): string {
@@ -57,6 +57,7 @@ export default class Combat extends AbstractScene {
         this.change_state(CombatState.CREATED);
         this.settings.team = this.combat_data.team;
         this.settings.opponent = this.combat_data.opponent;
+        this.settings.training = this.combat_data.training;
         this.stage = Stage.fromJSON(JSON.parse(this.combat_data.stage));
 
         this.renderer = new CombatRenderer(this.render_context, this.settings, this.stage.height);
@@ -73,12 +74,13 @@ export default class Combat extends AbstractScene {
             this.movement_y = pointer.y;
         });
 
-        this.socket.on('deployment-started', (deployment_payload: any) => {
+        this.socket.on('deployment-started', (payload: any) => {
             if (this.state !== CombatState.CREATED) return;
             this.change_state(CombatState.DEPLOYMENT_STARTED);
 
-            this.deploy_max = deployment_payload.deployment_max;
-            const deployment_tiles: Array<Vector> = deployment_payload.deployment_tiles;
+            this.players_max = payload.players_max;
+            this.deploy_max = payload.deployment_max;
+            const deployment_tiles: Array<Vector> = payload.deployment_tiles;
             this.begin_deployment(deployment_tiles);
         });
 
@@ -271,7 +273,6 @@ export default class Combat extends AbstractScene {
             this.renderer.deploy_unit = null;
 
             this.renderer.display_deployment_ui(true);
-
         }
     }
 

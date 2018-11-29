@@ -55,12 +55,14 @@ export default class CombatRenderer {
     }
 
     public render_turn(resolubles: Array<Resoluble>): void {
-        // if (this.attack_tiles && this.attack_tiles.length) {
-        //     for (const attack_tile of this.attack_tiles) {
-        //         attack_tile.destroy();
-        //     }
-        // }
-        // this.attack_tiles = new Array<AbstractSprite>();
+        if (this.settings.training) {
+            if (this.attack_tiles && this.attack_tiles.length) {
+                for (const attack_tile of this.attack_tiles) {
+                    attack_tile.destroy();
+                }
+            }
+            this.attack_tiles = new Array<AbstractSprite>();
+        }
 
         const faces: Array<Face> = resolubles.filter(resoluble => resoluble.type === 'Face') as any;
         for (const resoluble of faces) {
@@ -78,13 +80,15 @@ export default class CombatRenderer {
         for (const resoluble of attacks) {
             for (const position of (resoluble as any).targetted_positions) {
                 const world: Vector = this.local_to_world(position);
-                this.render_context.render_effect('attack_effect', world);
-                // , () => {
-                //     const attack_tile: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'attack_tile');
-                //     attack_tile.set_scale(this.tile_scalar, this.tile_scalar);
-                //     attack_tile.set_anchor(0.5, 0.25);
-                //     this.attack_tiles.push(attack_tile);
-                // }, this);
+                this.render_context.render_effect('attack_effect', world, () => {
+                    if (resoluble.source.team !== 1) return;
+                    if (!this.settings.training) return;
+
+                    const attack_tile: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'red_tile');
+                    attack_tile.set_scale(this.tile_scalar, this.tile_scalar);
+                    attack_tile.set_anchor(0.5, 0.25);
+                    this.attack_tiles.push(attack_tile);
+                }, this);
             }
         }
 
@@ -252,7 +256,7 @@ export default class CombatRenderer {
 
         for (const deployment_tile of deployment_tiles) {
             const world: Vector = this.local_to_world(deployment_tile);
-            const tile_key: string = this.settings.team === 0 ? 'blue_tile': 'red_tile';
+            const tile_key: string = this.settings.team === 0 ? 'blue_tile' : 'red_tile';
             const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, tile_key, this.deploy_ui);
             tile_sprite.set_scale(this.tile_scalar, this.tile_scalar);
             tile_sprite.set_anchor(0.5, 0.25);
