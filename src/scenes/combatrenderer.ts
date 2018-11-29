@@ -24,6 +24,7 @@ export default class CombatRenderer {
     public ready_text: AbstractText;
     public timer_text: AbstractText;
     public attack_tiles: Array<AbstractSprite>;
+    public previous_tutorial_step: number;
 
     public get entity_adjust_y(): number {
         return 15;
@@ -52,9 +53,12 @@ export default class CombatRenderer {
     constructor(private readonly render_context: RenderContext, private readonly settings: ClientSettings, private readonly extent: number) {
         this.deploy_classes = new Array<AbstractSprite>();
         this.deploy_ui = new Array<AbstractSprite | AbstractText>();
+        if (this.settings.training) this.previous_tutorial_step = 0;
     }
 
     public render_turn(resolubles: Array<Resoluble>): void {
+        let unit_death: boolean = false;
+
         if (this.settings.training) {
             if (this.attack_tiles && this.attack_tiles.length) {
                 for (const attack_tile of this.attack_tiles) {
@@ -74,6 +78,8 @@ export default class CombatRenderer {
             const position: Vector = this.local_to_world(resoluble.source.spatial.position);
             position.y += this.entity_adjust_y;
             resoluble.source.get('sprite').set_position(position.x, position.y);
+
+            this.advance_tutorial(4);
         }
 
         const attacks: Array<Attack> = resolubles.filter(resoluble => resoluble.type === 'Attack') as any;
@@ -99,6 +105,13 @@ export default class CombatRenderer {
             animation_key += resoluble.target.team === 0 ? '_blue' : '_red';
 
             resoluble.target.get('sprite').framework_object.play(animation_key);
+
+            if (resoluble.target.team === 1) unit_death = true;
+        }
+
+        if (unit_death) {
+            this.advance_tutorial(6);
+            this.advance_tutorial(5);
         }
     }
 
@@ -198,6 +211,8 @@ export default class CombatRenderer {
         red_team_text.set_font_size(subtitle_size);
         red_team_text.set_anchor(1, 0);
         red_team_text.affix_ui();
+
+        if (this.settings.training) this.render_context.set_notification_position(new Vector(this.render_context.center_x, blue_banner.y + blue_banner.height + (this.render_context.buffer * 2), this.overlay_depth));
     }
 
     public render_deployment_ui(deployment_tiles: Array<Vector>): void {
@@ -212,7 +227,7 @@ export default class CombatRenderer {
         this.unit_frame_pos = new Vector(this.render_context.width, this.render_context.height - (this.unit_frame.height / 2));
         this.unit_ui.set_position(this.unit_frame_pos.x, this.unit_frame_pos.y);
 
-        const class_keys: Array<string> = ['sword_unit', 'spear_unit', 'bow_unit'];
+        const class_keys: Array<string> = ['bow_unit', 'spear_unit', 'sword_unit'];
 
         let index: number = 0;
         for (const class_key of class_keys) {
@@ -318,6 +333,7 @@ export default class CombatRenderer {
             this.timer_text.set_font_size(20);
             this.timer_text.set_anchor(0.5, 0);
             this.timer_text.affix_ui();
+            this.timer_text.set_depth(this.overlay_depth);
         }
 
         this.timer_text.text = timer.toFixed(2);
@@ -366,6 +382,34 @@ export default class CombatRenderer {
         subtitle.affix_ui();
         subtitle.set_depth(this.overlay_depth);
         subtitle.set_stroke(6);
+    }
+
+    public advance_tutorial(step: number): void {
+        if (!this.settings.training) return;
+        if (step !== this.previous_tutorial_step + 1) return;
+
+        switch (step) {
+            case 1:
+                this.render_context.display_notification('Click and drag up to four units from the bottom right hand corner of the screen onto the colored tiles to form your team. Click the ready button when satisfied.');
+                break;
+            case 2:
+                this.render_context.hide_notification();
+                break;
+            case 3:
+                this.render_context.display_notification('Battle progresses at a set timestep, visible at the top of the screen. All orders for both teams are resolved every time it hits 0. Move your units by clicking and dragging in a direction. You can move multiple units each turn.');
+                break;
+            case 4:
+                this.render_context.display_notification('All units move (if ordered), then attack (always) in that order every turn. Each unit type has a different attack range. These have been outlined with red squares for opponents within the training mode. Try to attack an enemy unit, and be sure not to hit your own.');
+                break;
+            case 5:
+                this.render_context.display_notification('The bodies of fallen units will remain, and present an obstacle that cannot be moved through. The goal of each match is to finish each unit your opponent controls. Try to complete the match.');
+                break;
+            case 6: 
+                this.render_context.hide_notification();
+                break;
+        }
+
+        this.previous_tutorial_step = step;
     }
 
     public update_entity_facing(entity: Entity): void {

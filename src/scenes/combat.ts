@@ -263,6 +263,8 @@ export default class Combat extends AbstractScene {
             this.change_state(CombatState.DEPLOYMENT_COMPLETE);
             this.ready_packet();
         }, this);
+
+        this.renderer.advance_tutorial(1);
     }
 
     private clear_deployment(): void {
@@ -273,6 +275,7 @@ export default class Combat extends AbstractScene {
             this.renderer.deploy_unit = null;
 
             this.renderer.display_deployment_ui(true);
+            this.renderer.advance_tutorial(2);
         }
     }
 
@@ -287,6 +290,8 @@ export default class Combat extends AbstractScene {
 
         const center_world: Vector = this.renderer.local_to_world(this.stage.get_center());
         this.render_context.camera.pan(center_world.x, center_world.y);
+
+        this.renderer.advance_tutorial(3);
     }
 
     private init_input(): void {

@@ -71,6 +71,8 @@ export default class AbstractText {
     }
 
     public set_word_wrap(wrap_width: number): void {
+        this.framework_object.setWordWrapWidth(wrap_width);
+
         // this.framework_object.wordWrap = true;
         // this.framework_object.wordWrapWidth = wrap_width;
     }

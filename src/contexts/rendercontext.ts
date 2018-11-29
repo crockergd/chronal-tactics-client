@@ -9,6 +9,8 @@ import AbstractGroup from '../abstracts/abstractgroup';
 export default class RenderContext {
     public scene: AbstractScene;
     public ui_camera: Phaser.Cameras.Scene2D.Camera;
+    private notification_position: Vector;
+    private notification_text: AbstractText;
 
     public get buffer(): number {
         return 10;
@@ -73,5 +75,25 @@ export default class RenderContext {
         const sprite: Textures.Frame = this.scene.textures.getFrame(key);
 
         return new Vector(sprite.width, sprite.height);
+    }
+
+    public set_notification_position(position: Vector): void {
+        this.notification_position = new Vector(position.x, position.y);
+        this.notification_text = this.add_text(this.notification_position.x, this.notification_position.y, '');
+        this.notification_text.set_font_size(20);
+        this.notification_text.set_anchor(0.5, 0);
+        this.notification_text.set_word_wrap(this.width * 0.7);
+        this.notification_text.set_depth(position.z);
+        this.notification_text.affix_ui();
+        this.notification_text.set_visible(false);
+    }
+
+    public display_notification(notification: string): void {
+        this.notification_text.text = notification;
+        this.notification_text.set_visible(true);
+    }
+
+    public hide_notification(): void {
+        this.notification_text.set_visible(false);
     }
 }
