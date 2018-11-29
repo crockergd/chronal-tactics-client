@@ -31,6 +31,7 @@ export default class Lobby extends AbstractScene {
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_anchor(0.5, 0.5);
+        this.title.set_stroke(6);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
@@ -50,6 +51,7 @@ export default class Lobby extends AbstractScene {
         const connect_text: AbstractText = this.render_context.add_text(connect_btn.x, connect_btn.y, 'Play');
         connect_text.set_font_size(36);
         connect_text.set_anchor(0.5, 0.5);
+        connect_text.set_stroke(4);
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {

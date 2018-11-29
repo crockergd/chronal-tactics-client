@@ -12,10 +12,10 @@ export default class AbstractText {
         fontSize: '16px',
         fill: '#fff',
         stroke: '#000',
-        strokeThickness: 2
+        strokeThickness: 3
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup| Array<any>) {
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup | Array<any>) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         // this.framework_object.lineSpacing = -4;
@@ -64,6 +64,10 @@ export default class AbstractText {
 
         // this.framework_object.setFontSize = font_size;
         // this.framework_object.fontSize *= this.renderer.base_scale_factor;
+    }
+
+    public set_stroke(stroke_size: number): void {
+        this.framework_object.setStroke('#000', stroke_size);
     }
 
     public set_word_wrap(wrap_width: number): void {

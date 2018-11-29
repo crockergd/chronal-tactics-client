@@ -37,10 +37,8 @@ export default class Combat extends AbstractScene {
     private timer: number = 0;
     private interval: number = 3;
 
-    // server is preventing units from moving to a space a unit is in, even if unit is leaving that turn
     // redraw unit sprites
     // add tutorial
-    // add catch for players who deploy 0 units
 
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / 2';

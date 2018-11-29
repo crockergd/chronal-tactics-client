@@ -234,15 +234,17 @@ export default class CombatRenderer {
         this.deploy_stat_text.affix_ui();
         this.deploy_stat_text.set_anchor(0.5, 0);
 
-        this.ready_btn = this.render_context.add_sprite(this.render_context.center_x, this.render_context.height, 'generic_btn', this.deploy_ui);
+        this.ready_btn = this.render_context.add_sprite(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 3), 'generic_btn', this.deploy_ui);
         this.ready_btn.set_scale(2, 2);
-        this.ready_btn.set_position(this.ready_btn.x, this.ready_btn.y - (this.ready_btn.height * 2));
         this.ready_btn.affix_ui();
+        this.ready_btn.set_visible(false);
 
         this.ready_text = this.render_context.add_text(this.ready_btn.x, this.ready_btn.y, 'Ready', this.deploy_ui);
         this.ready_text.set_font_size(36);
         this.ready_text.set_anchor(0.5, 0.5);
+        this.ready_text.set_stroke(4);
         this.ready_text.affix_ui();
+        this.ready_text.set_visible(false);
 
         for (const ui of this.deploy_ui) {
             ui.set_depth(this.overlay_depth);
@@ -352,12 +354,14 @@ export default class CombatRenderer {
         title.set_anchor(0.5, 0.5);
         title.affix_ui();
         title.set_depth(this.overlay_depth);
+        title.set_stroke(6);
 
         const subtitle: AbstractText = this.render_context.add_text(this.render_context.center_x, title.y + title.height, completed_string);
         subtitle.set_font_size(72);
         subtitle.set_anchor(0.5, 0.5);
         subtitle.affix_ui();
         subtitle.set_depth(this.overlay_depth);
+        subtitle.set_stroke(6);
     }
 
     public update_entity_facing(entity: Entity): void {

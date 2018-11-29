@@ -14,6 +14,7 @@ export default class Boot extends AbstractScene {
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(84);
         this.title.set_anchor(0.5, 0.5);
+        this.title.set_stroke(6);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
