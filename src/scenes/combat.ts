@@ -37,9 +37,6 @@ export default class Combat extends AbstractScene {
     private timer: number = 0;
     private interval: number = 3;
 
-    // redraw unit sprites
-    // add tutorial
-
     private get players_ready_string(): string {
         return 'Players Ready: ' + this.players_ready + ' / ' + this.players_max;
     }
@@ -369,7 +366,7 @@ export default class Combat extends AbstractScene {
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
 
-            // this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
+            this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
         }, this);
     }
 

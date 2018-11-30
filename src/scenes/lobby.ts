@@ -134,7 +134,7 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        // this.socket = Sio('https://radbee.me:3010');
-        this.socket = Sio('localhost:3010');
+        this.socket = Sio('https://radbee.me:3010');
+        // this.socket = Sio('localhost:3010');
     }
 }

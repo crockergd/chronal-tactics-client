@@ -88,163 +88,151 @@ export default class Boot extends AbstractScene {
 
         this.anims.create({
             key: 'idle_forward_sword_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('sword_unit', {
                 start: 0,
-                end: 3
+                end: 0
             })
         });
         this.anims.create({
             key: 'idle_backward_sword_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('sword_unit', {
-                start: 4,
-                end: 7
+                start: 1,
+                end: 1
             })
         });
         this.anims.create({
             key: 'death_sword_unit_blue',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'sword_unit',
-                frame: 8
+                frame: 2
             }]
         });
 
         this.anims.create({
             key: 'idle_forward_sword_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('sword_unit', {
-                start: 9,
-                end: 12
+                start: 3,
+                end: 3
             })
         });
         this.anims.create({
             key: 'idle_backward_sword_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('sword_unit', {
-                start: 13,
-                end: 16
+                start: 4,
+                end: 4
             })
         });
         this.anims.create({
             key: 'death_sword_unit_red',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'sword_unit',
-                frame: 17
+                frame: 5
             }]
         });
 
         this.anims.create({
             key: 'idle_forward_spear_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('spear_unit', {
                 start: 0,
-                end: 3
+                end: 0
             })
         });
         this.anims.create({
             key: 'idle_backward_spear_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('spear_unit', {
-                start: 4,
-                end: 7
+                start: 1,
+                end: 1
             })
         });
         this.anims.create({
             key: 'death_spear_unit_blue',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'spear_unit',
-                frame: 8
+                frame: 2
             }]
         });
 
         this.anims.create({
             key: 'idle_forward_spear_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('spear_unit', {
-                start: 9,
-                end: 12
+                start: 3,
+                end: 3
             })
         });
         this.anims.create({
             key: 'idle_backward_spear_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('spear_unit', {
-                start: 13,
-                end: 16
+                start: 4,
+                end: 4
             })
         });
         this.anims.create({
             key: 'death_spear_unit_red',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'spear_unit',
-                frame: 17
+                frame: 5
             }]
         });
 
         this.anims.create({
             key: 'idle_forward_bow_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('bow_unit', {
                 start: 0,
-                end: 3
+                end: 0
             })
         });
         this.anims.create({
             key: 'idle_backward_bow_unit_blue',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('bow_unit', {
-                start: 4,
-                end: 7
+                start: 1,
+                end: 1
             })
         });
         this.anims.create({
             key: 'death_bow_unit_blue',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'bow_unit',
-                frame: 8
+                frame: 2
             }]
         });
 
         this.anims.create({
             key: 'idle_forward_bow_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('bow_unit', {
-                start: 9,
-                end: 12
+                start: 3,
+                end: 3
             })
         });
         this.anims.create({
             key: 'idle_backward_bow_unit_red',
-            frameRate: 6,
-            repeat: -1,
+            frameRate: 1,
             frames: this.anims.generateFrameNumbers('bow_unit', {
-                start: 13,
-                end: 16
+                start: 4,
+                end: 4
             })
         });
         this.anims.create({
             key: 'death_bow_unit_red',
-            frameRate: 6,
+            frameRate: 1,
             frames: [{
                 key: 'bow_unit',
-                frame: 17
+                frame: 5
             }]
         });
     }

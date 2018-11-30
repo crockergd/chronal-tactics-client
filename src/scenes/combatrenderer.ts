@@ -232,7 +232,7 @@ export default class CombatRenderer {
         let index: number = 0;
         for (const class_key of class_keys) {
             const sprite: AbstractSprite = this.render_context.add_sprite(this.unit_frame.x, this.unit_frame.y - (this.unit_frame.height / 2), class_key, this.unit_ui);
-            sprite.set_frame(this.settings.team === 0 ? 1 : 10);
+            sprite.set_frame(this.settings.team === 0 ? 0 : 3);
             sprite.set_scale(this.unit_scalar, this.unit_scalar);
             sprite.set_anchor(1, 0.5);
             sprite.set_position(sprite.x - (((sprite.width + this.render_context.buffer) * index) + sprite.width / 2), sprite.y);
