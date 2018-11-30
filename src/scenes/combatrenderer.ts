@@ -77,7 +77,15 @@ export default class CombatRenderer {
         for (const resoluble of movements) {
             const position: Vector = this.local_to_world(resoluble.source.spatial.position);
             position.y += this.entity_adjust_y;
-            resoluble.source.get('sprite').set_position(position.x, position.y);
+            // resoluble.source.get('sprite').set_position(position.x, position.y);
+
+            this.render_context.scene.tweens.add({
+                targets: resoluble.source.get('sprite').framework_object,
+                x: position.x,
+                y: position.y,
+                duration: 300,
+                ease: 'Power2'
+            });
 
             this.advance_tutorial(4);
         }
