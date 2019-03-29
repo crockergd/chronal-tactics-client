@@ -12,12 +12,25 @@
             "webRoot": "${workspaceRoot}",
             "userDataDir": "${workspaceRoot}/.vscode/chrome",
             "sourceMaps": true,
-            "smartStep": true,            
+            "smartStep": true,
             "trace": true,
             "internalConsoleOptions": "openOnSessionStart",
             "runtimeArgs": [
                 "--app-auto-launched"
             ]
-        }
+        },
+        {
+            "name": "Run Android on device",
+            "type": "cordova",
+            "request": "launch",
+            "platform": "android",
+            "target": "device",
+            "port": 9222,
+            "sourceMaps": true,
+            "cwd": "${workspaceRoot}",
+            "ionicLiveReload": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": "webpack-mobile"
+        },
     ]
 }

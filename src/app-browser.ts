@@ -1,28 +1,21 @@
 const css: any = require('../assets/styles/style.css');
 import AbstractGame from './abstracts/abstractgame';
 
-window.addEventListener('DOMContentLoaded', () => {
+{
     let width: number = window.innerWidth;
     let height: number = window.innerHeight
 
     let dpr: number = window.devicePixelRatio;
 
     const config: GameConfig = {
+        type: Phaser.CANVAS,
         width: width,
         height: height,
-        type: Phaser.AUTO,
         resolution: dpr,
         render: {
-            pixelArt: true
+            pixelArt: true,
         }
     };
 
     const game: AbstractGame = new AbstractGame(config);
-
-    // window.addEventListener('resize', () => {
-    //     let width: number = window.innerWidth;
-    //     let height: number = window.innerHeight
-
-    //     game.resize(width, height);
-    // });
-});
+}

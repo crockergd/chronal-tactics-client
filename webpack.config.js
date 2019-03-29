@@ -1,15 +1,20 @@
 const path = require('path');
 const webpack = require('webpack');
-
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = function () {
+    let entry_file = 'app-browser';
+    let template_file = 'index-browser.ejs';
+    if (process.env.platform && process.env.platform == 'mobile') {
+        entry_file = 'app-mobile';
+        template_file = 'index-mobile.ejs';
+    }
+
     const config = {
         mode: 'development',
-        devtool: 'source-map',
+        devtool: 'eval-source-map',
 
-        entry: './src/index.ts',
+        entry: path.join(__dirname, 'src', entry_file),
 
         output: {
             path: path.resolve(__dirname, 'www'),
@@ -57,23 +62,13 @@ module.exports = function () {
         plugins: [
             new HtmlWebpackPlugin({
                 title: 'Isochronal Tactics',
-                template: path.resolve(__dirname, 'templates', 'index.ejs')
+                template: path.resolve(__dirname, 'templates', template_file)
             }),
 
             new webpack.DefinePlugin({
                 "typeof PLUGIN_FBINSTANT": JSON.stringify(false)
             })
         ],
-
-        optimization: {
-            minimizer: [
-                new UglifyJsPlugin({
-                    uglifyOptions: {
-                        keep_fnames: true
-                    }
-                })
-            ]
-        },
 
         devServer: {
             contentBase: path.join(__dirname, 'www'),
