@@ -2,6 +2,7 @@ import Sio from 'socket.io-client';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
+import AbstractButton from '../abstracts/abstractbutton';
 
 enum LobbyState {
     IDLE,
@@ -24,43 +25,30 @@ export default class Lobby extends AbstractScene {
     public create(): void {
         this.state = LobbyState.IDLE;
 
-        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient');
-        bg.affix_ui();
+        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient', null, true);
 
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
-        this.title.set_font_size(84);
+        this.title.set_font_size(48);
+        this.title.set_stroke(8 / this.render_context.DPR);
         this.title.set_anchor(0.5, 0.5);
-        this.title.set_stroke(6);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
 
-        this.footer = this.render_context.add_text(this.render_context.center_x, this.render_context.height, '');
-        this.footer.set_font_size(24);
+        this.footer = this.render_context.add_text(this.render_context.center_x, this.render_context.height - this.render_context.buffer, '');
+        this.footer.set_font_size(16);
         this.footer.set_anchor(0.5, 1);
-        this.footer.set_position(this.footer.x, this.footer.y - ((this.footer.height * 2) + this.render_context.buffer));
 
         this.name = this.render_context.add_text(this.render_context.buffer, this.render_context.buffer, this.settings.name);
-        this.name.set_font_size(28);
+        this.name.set_font_size(16);
 
-        const connect_btn: AbstractSprite = this.render_context.add_sprite(this.footer.x, this.footer.y, 'generic_btn');
-        connect_btn.set_scale(2.0, 2.0);
-        connect_btn.set_position(connect_btn.x + ((connect_btn.width / 2) + (this.render_context.buffer * 2)), connect_btn.y - (connect_btn.height * 2));
-
-        const connect_text: AbstractText = this.render_context.add_text(connect_btn.x, connect_btn.y, 'Play');
-        connect_text.set_font_size(36);
-        connect_text.set_anchor(0.5, 0.5);
-        connect_text.set_stroke(4);
-
-        const training_btn: AbstractSprite = this.render_context.add_sprite(this.footer.x, connect_btn.y, 'generic_btn');
-        training_btn.set_scale(2.0, 2.0);
-        training_btn.set_position(training_btn.x - ((training_btn.width / 2) + (this.render_context.buffer * 2)), training_btn.y);
-
-        const training_text: AbstractText = this.render_context.add_text(training_btn.x, training_btn.y, 'Training');
-        training_text.set_font_size(36);
-        training_text.set_anchor(0.5, 0.5);
-        training_text.set_stroke(4);
+        const connect_btn: AbstractButton = this.render_context.add_button(this.footer.x, this.footer.y, 'generic_btn', 'Play');
+        connect_btn.set_position((connect_btn.width / 2) + (this.render_context.buffer * 2), -(connect_btn.height * 2), true);
+        connect_btn.center();
+        const training_btn: AbstractButton = this.render_context.add_button(this.footer.x, this.footer.y, 'generic_btn', 'Training');
+        training_btn.set_position(-((connect_btn.width / 2) + (this.render_context.buffer * 2)), -(connect_btn.height * 2), true);
+        training_btn.center();
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {
@@ -125,7 +113,7 @@ export default class Lobby extends AbstractScene {
 
             this.footer.text = 'Matchmaking';
 
-            this.footer.text += '     ';
+            this.footer.text += ' ';
             this.footer.text += now.getMinutes().toString();
             this.footer.text += ':'
             if (now.getSeconds() < 10) this.footer.text += '0';

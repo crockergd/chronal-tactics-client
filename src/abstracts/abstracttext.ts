@@ -1,41 +1,37 @@
 import { GameObjects, Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
-import AbstractContainer from './abstractcontainer';
 import AbstractGroup from './abstractgroup';
+import { Vector } from 'turn-based-combat-framework';
 
 export default class AbstractText {
     private renderer: RenderContext;
+    private parent?: AbstractGroup;
     public framework_object: GameObjects.Text;
 
     private readonly STYLE: object = {
         fontFamily: 'silkscreennormal, Arial',
-        fontSize: '16px',
-        fill: '#fff',
-        stroke: '#000',
-        strokeThickness: 3
+        fill: '#fff'
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup | Array<any>) {
-        this.renderer = renderer;
-        this.framework_object = scene.add.text(x, y, text, this.STYLE);
-        // this.framework_object.lineSpacing = -4;
-
-        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
-
-        if (container) {
-            if (Array.isArray(container)) {
-                container.push(this);
-            } else {
-                container.add(this);
-            }
-        }
+    get position(): Vector {
+        return new Vector(this.x, this.y);
     }
 
     get x(): number {
-        return this.framework_object.x;
+        const parent_adjust: number = this.parent ? this.parent.absolute_x : 0;
+        return this.absolute_x - parent_adjust;
     }
 
     get y(): number {
+        const parent_adjust: number = this.parent ? this.parent.absolute_y : 0;
+        return this.absolute_y - parent_adjust;
+    }
+
+    get absolute_x(): number {
+        return this.framework_object.x;
+    }
+
+    get absolute_y(): number {
         return this.framework_object.y;
     }
 
@@ -47,8 +43,8 @@ export default class AbstractText {
         return Math.abs(this.framework_object.height);
     }
 
-    public set_anchor(x: number, y: number): void {
-        this.framework_object.setOrigin(x, y);
+    get alpha(): number {
+        return this.framework_object.alpha;
     }
 
     get text(): string {
@@ -59,11 +55,22 @@ export default class AbstractText {
         this.framework_object.text = text;
     }
 
-    public set_font_size(font_size: number): void {
-        this.framework_object.setFontSize(font_size);
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractGroup) {
+        this.renderer = renderer;
+        this.framework_object = scene.add.text(x, y, text, this.STYLE);
+        this.set_font_size(16);
+        // this.framework_object.lineSpacing = -4;
 
-        // this.framework_object.setFontSize = font_size;
-        // this.framework_object.fontSize *= this.renderer.base_scale_factor;
+        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
+
+        if (container) {
+            container.add(this);
+        }
+    }
+
+    public set_font_size(font_size: number): void {
+        this.framework_object.setFontSize(this.renderer.literal(font_size));
+        this.set_stroke((font_size / 3) / this.renderer.DPR);
     }
 
     public set_stroke(stroke_size: number): void {
@@ -71,14 +78,19 @@ export default class AbstractText {
     }
 
     public set_word_wrap(wrap_width: number): void {
-        this.framework_object.setWordWrapWidth(wrap_width);
-
-        // this.framework_object.wordWrap = true;
-        // this.framework_object.wordWrapWidth = wrap_width;
+        this.framework_object.setWordWrapWidth(this.renderer.literal(wrap_width));
     }
 
-    public set_position(x: number, y: number): void {
-        this.framework_object.setPosition(x, y);
+    public set_position(x: number, y: number, relative: boolean = false): void {
+        if (relative) {
+            this.framework_object.setPosition(this.framework_object.x + x, this.framework_object.y + y);
+        } else {
+            this.framework_object.setPosition(x, y);
+        }
+    }
+
+    public set_anchor(x: number, y: number): void {
+        this.framework_object.setOrigin(x, y);
     }
 
     public set_scroll(scroll_x: number, scroll_y: number): void {
@@ -86,11 +98,28 @@ export default class AbstractText {
     }
 
     public set_depth(depth: number): void {
+        if (this.framework_object.depth > depth) return;
         this.framework_object.setDepth(depth);
     }
 
     public set_visible(visible: boolean): void {
         this.framework_object.visible = visible;
+    }
+
+    public set_alpha(alpha: number): void {
+        this.framework_object.setAlpha(alpha);
+    }
+
+    public set_fill(fill: string): void {
+        this.framework_object.setFill(fill);
+    }
+
+    public set_line_spacing(spacing: number): void {
+        this.framework_object.setLineSpacing(this.renderer.literal(spacing));
+    }
+
+    public set_parent(parent: AbstractGroup): void {
+        this.parent = parent;
     }
 
     public affix_ui(): void {

@@ -4,7 +4,7 @@ import RenderContext from '../contexts/rendercontext';
 import ClientSettings from '../utils/clientsettings';
 
 export default class AbstractScene extends Scene {
-    protected scene_context: SceneContext;
+    public scene_context: SceneContext;
     protected socket: SocketIOClient.Socket;
     protected combat_data: any;
 
@@ -21,14 +21,16 @@ export default class AbstractScene extends Scene {
     }
 
     public init(data: any) {
-        this.scene_context = data.scene_context;
-        this.scene_context.set_scene(this);
+        if (data) {
+            this.scene_context = data.scene_context;
+            this.scene_context.set_scene(this);
 
-        this.socket = data.socket;
-        this.combat_data = data.combat_data;
+            this.socket = data.socket;
+            this.combat_data = data.combat_data;
+        }
     }
 
-    public start(key: string, data: any): void {
+    public start(key: string, data?: any): void {
         this.scene.start(key, data);
     }
 }

@@ -1,41 +1,41 @@
 import RenderContext from '../contexts/rendercontext';
 import Stage from '../stages/stage';
 import { Vector, Resoluble, Face, Move, Attack, Death, Entity } from 'turn-based-combat-framework';
-import AbstractContainer from '../abstracts/abstractcontainer';
 import AbstractText from '../abstracts/abstracttext';
 import ClientSettings from '../utils/clientsettings';
 import AbstractSprite from '../abstracts/abstractsprite';
 import { AbstractType } from '../abstracts/abstracttype';
+import AbstractGroup from '../abstracts/abstractgroup';
+import AbstractButton from '../abstracts/abstractbutton';
 
 export default class CombatRenderer {
-    public container: AbstractContainer;
+    public container: AbstractGroup;
     public tile_width: number;
     public tile_height: number;
 
     public unit_frame_pos: Vector;
     public unit_frame: AbstractSprite;
-    public unit_ui: AbstractContainer;
-    public deploy_ui: Array<AbstractType>;
+    public unit_ui: AbstractGroup;
+    public deploy_ui: AbstractGroup;
     public deploy_unit: AbstractSprite;
     public deploy_classes: Array<AbstractSprite>;
     public deploy_stat_text: AbstractText;
     public ready_stat_text: AbstractText;
-    public ready_btn: AbstractSprite;
-    public ready_text: AbstractText;
+    public ready_btn: AbstractButton;
     public timer_text: AbstractText;
     public attack_tiles: Array<AbstractSprite>;
     public previous_tutorial_step: number;
 
     public get entity_adjust_y(): number {
-        return 15;
+        return this.render_context.literal(15 / 2);
     }
 
     public get unit_scalar(): number {
-        return 4;
+        return 4 / 2;
     }
 
     public get tile_scalar(): number {
-        return 6;
+        return 6 / 2;
     }
 
     public get unit_depth(): number {
@@ -52,7 +52,6 @@ export default class CombatRenderer {
 
     constructor(private readonly render_context: RenderContext, private readonly settings: ClientSettings, private readonly extent: number) {
         this.deploy_classes = new Array<AbstractSprite>();
-        this.deploy_ui = new Array<AbstractSprite | AbstractText>();
         if (this.settings.training) this.previous_tutorial_step = 0;
     }
 
@@ -100,7 +99,7 @@ export default class CombatRenderer {
 
                     const attack_tile: AbstractSprite = this.render_context.add_sprite(world.x, world.y, 'red_tile');
                     attack_tile.set_scale(this.tile_scalar, this.tile_scalar);
-                    attack_tile.set_anchor(0.5, 0.25);
+                    attack_tile.set_anchor(0.5, 0.3);
                     this.attack_tiles.push(attack_tile);
                 }, this);
             }
@@ -130,22 +129,24 @@ export default class CombatRenderer {
     }
 
     public render_stage(stage: Stage): void {
-        this.container = this.render_context.add_container(0, 0);
+        this.container = this.render_context.add_group();
 
         const tile_key: string = 'base_tile';
 
         const tile_dimensions: Vector = this.render_context.get_sprite_dimensions(tile_key);
+        tile_dimensions.x *= this.render_context.base_scale_factor;
+        tile_dimensions.y *= this.render_context.base_scale_factor;
         tile_dimensions.x *= this.tile_scalar;
         tile_dimensions.y *= this.tile_scalar;
         this.tile_width = (tile_dimensions.x / 2);
-        this.tile_height = (tile_dimensions.y / 4) + 3;
+        this.tile_height = (tile_dimensions.y / 4) + this.render_context.literal(1.495);
 
         for (let i: number = stage.width - 1; i >= 0; i--) {
             for (let j: number = 0; j < stage.height; j++) {
                 const position: Vector = this.local_to_world(new Vector(i, j));
 
                 stage.grid[i][j].sprite = this.render_context.add_sprite(position.x, position.y, tile_key, this.container);
-                stage.grid[i][j].sprite.set_anchor(0.5, 0.25);
+                stage.grid[i][j].sprite.set_anchor(0.5, 0.3);
                 stage.grid[i][j].sprite.set_scale(this.tile_scalar, this.tile_scalar);
             }
         }
@@ -189,19 +190,18 @@ export default class CombatRenderer {
 
     public render_team_ui(): void {
         const is_blue: boolean = this.settings.team === 0;
-        const title_size: number = 28;
-        const subtitle_size: number = 20;
+        const title_size: number = 16;
+        const subtitle_size: number = 12;
 
         const blue_banner: AbstractSprite = this.render_context.add_sprite(0, 0, 'blue_banner');
         blue_banner.set_scale(this.unit_scalar, this.unit_scalar);
-        blue_banner.set_anchor(0, 0);
         blue_banner.set_alpha(0.8);
         blue_banner.affix_ui();
 
-        const blue_name_text: AbstractText = this.render_context.add_text(this.render_context.buffer, this.render_context.buffer, is_blue ? this.settings.name : this.settings.opponent);
+        const blue_name_text: AbstractText = this.render_context.add_text(this.render_context.buffer_sm, this.render_context.buffer_sm, is_blue ? this.settings.name : this.settings.opponent);
         blue_name_text.set_font_size(title_size);
         blue_name_text.affix_ui();
-        const blue_team_text: AbstractText = this.render_context.add_text(blue_name_text.x, blue_name_text.y + blue_name_text.height + this.render_context.buffer, is_blue ? 'YOU' : 'OPPONENT');
+        const blue_team_text: AbstractText = this.render_context.add_text(blue_name_text.x, blue_name_text.y + blue_name_text.height, is_blue ? 'YOU' : 'OPPONENT');
         blue_team_text.set_font_size(subtitle_size);
         blue_team_text.affix_ui();
 
@@ -211,11 +211,11 @@ export default class CombatRenderer {
         red_banner.set_alpha(0.8);
         red_banner.affix_ui();
 
-        const red_name_text: AbstractText = this.render_context.add_text(this.render_context.width - this.render_context.buffer, this.render_context.buffer, is_blue ? this.settings.opponent : this.settings.name);
+        const red_name_text: AbstractText = this.render_context.add_text(this.render_context.width - this.render_context.buffer_sm, this.render_context.buffer_sm, is_blue ? this.settings.opponent : this.settings.name);
         red_name_text.set_font_size(title_size);
         red_name_text.set_anchor(1, 0);
         red_name_text.affix_ui();
-        const red_team_text: AbstractText = this.render_context.add_text(red_name_text.x, red_name_text.y + red_name_text.height + this.render_context.buffer, is_blue ? 'OPPONENT' : 'YOU');
+        const red_team_text: AbstractText = this.render_context.add_text(red_name_text.x, red_name_text.y + red_name_text.height, is_blue ? 'OPPONENT' : 'YOU');
         red_team_text.set_font_size(subtitle_size);
         red_team_text.set_anchor(1, 0);
         red_team_text.affix_ui();
@@ -224,8 +224,9 @@ export default class CombatRenderer {
     }
 
     public render_deployment_ui(deployment_tiles: Array<Vector>): void {
-        this.unit_ui = this.render_context.add_container(0, 0);
-        this.deploy_ui.push(this.unit_ui);
+        this.unit_ui = this.render_context.add_group();
+        this.unit_ui.set_depth(this.overlay_depth);
+        this.deploy_ui = this.render_context.add_group();
 
         this.unit_frame = this.render_context.add_sprite(0, 0, 'unit_frame', this.unit_ui);
         this.unit_frame.set_scale(this.unit_scalar, this.unit_scalar);
@@ -243,7 +244,7 @@ export default class CombatRenderer {
             sprite.set_frame(this.settings.team === 0 ? 0 : 3);
             sprite.set_scale(this.unit_scalar, this.unit_scalar);
             sprite.set_anchor(1, 0.5);
-            sprite.set_position(sprite.x - (((sprite.width + this.render_context.buffer) * index) + sprite.width / 2), sprite.y);
+            sprite.set_position(-(((sprite.width + this.render_context.buffer) * index) + sprite.width / 2), 0, true);
             sprite.affix_ui();
 
             this.deploy_classes.push(sprite);
@@ -251,38 +252,33 @@ export default class CombatRenderer {
             index++;
         }
 
-        this.ready_stat_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer, '', this.deploy_ui);
-        this.ready_stat_text.set_font_size(20);
+        this.ready_stat_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer_sm, '', this.deploy_ui);
+        this.ready_stat_text.set_font_size(14);
         this.ready_stat_text.affix_ui();
         this.ready_stat_text.set_anchor(0.5, 0);
+        this.ready_stat_text.set_depth(this.overlay_depth);
 
-        this.deploy_stat_text = this.render_context.add_text(this.ready_stat_text.x, this.ready_stat_text.y + this.ready_stat_text.height + this.render_context.buffer, '', this.deploy_ui);
-        this.deploy_stat_text.set_font_size(20);
+        this.deploy_stat_text = this.render_context.add_text(this.ready_stat_text.x, this.ready_stat_text.y + this.ready_stat_text.height, '', this.deploy_ui);
+        this.deploy_stat_text.set_font_size(14);
         this.deploy_stat_text.affix_ui();
         this.deploy_stat_text.set_anchor(0.5, 0);
+        this.deploy_stat_text.set_depth(this.overlay_depth);
 
-        this.ready_btn = this.render_context.add_sprite(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 3), 'generic_btn', this.deploy_ui);
-        this.ready_btn.set_scale(2, 2);
+
+
+        this.ready_btn = this.render_context.add_button(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 3), 'generic_btn', 'Ready', this.deploy_ui);
+        // this.ready_btn.set_scale(2, 2);
         this.ready_btn.affix_ui();
         this.ready_btn.set_visible(false);
-
-        this.ready_text = this.render_context.add_text(this.ready_btn.x, this.ready_btn.y, 'Ready', this.deploy_ui);
-        this.ready_text.set_font_size(36);
-        this.ready_text.set_anchor(0.5, 0.5);
-        this.ready_text.set_stroke(4);
-        this.ready_text.affix_ui();
-        this.ready_text.set_visible(false);
-
-        for (const ui of this.deploy_ui) {
-            ui.set_depth(this.overlay_depth);
-        }
+        this.ready_btn.set_depth(this.overlay_depth);
+        this.ready_btn.center();
 
         for (const deployment_tile of deployment_tiles) {
             const world: Vector = this.local_to_world(deployment_tile);
             const tile_key: string = this.settings.team === 0 ? 'blue_tile' : 'red_tile';
             const tile_sprite: AbstractSprite = this.render_context.add_sprite(world.x, world.y, tile_key, this.deploy_ui);
             tile_sprite.set_scale(this.tile_scalar, this.tile_scalar);
-            tile_sprite.set_anchor(0.5, 0.25);
+            tile_sprite.set_anchor(0.5, 0.3);
         }
 
         const deployment_center: Vector = this.local_to_world(new Vector(this.settings.team === 0 ? 1 : 5, 3));
@@ -291,18 +287,18 @@ export default class CombatRenderer {
 
     public display_deployment_ui(show: boolean): void {
         this.ready_btn.set_visible(show);
-        this.ready_text.set_visible(show);
+        const value: number =  (this.unit_frame.width - (this.render_context.buffer * 2));
         if (!show) {
             this.render_context.scene.tweens.add({
-                targets: this.unit_ui.framework_object,
-                x: this.unit_frame_pos.x + (this.unit_frame.width - (this.render_context.buffer * 2)),
+                targets: this.unit_ui.children_framework_objects,
+                x: '+=' + value.toString(),
                 duration: 600,
                 ease: 'Power2'
             });
         } else {
             this.render_context.scene.tweens.add({
-                targets: this.unit_ui.framework_object,
-                x: this.unit_frame_pos.x,
+                targets: this.unit_ui.children_framework_objects,
+                x: '-=' + value.toString(),
                 duration: 600,
                 ease: 'Power2'
             });
@@ -311,10 +307,8 @@ export default class CombatRenderer {
 
     public destroy_deployment_ui(): void {
         this.ready_btn.destroy();
-        this.ready_text.destroy();
-        for (const ui of this.deploy_ui) {
-            if (ui) ui.destroy();
-        }
+        this.deploy_ui.destroy();
+        this.unit_ui.destroy();
     }
 
     public render_deployment_unit(deployment_class: string): void {
@@ -338,7 +332,7 @@ export default class CombatRenderer {
     public render_timer(timer: number, interval: number): void {
         if (!this.timer_text) {
             this.timer_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer, '');
-            this.timer_text.set_font_size(20);
+            this.timer_text.set_font_size(16);
             this.timer_text.set_anchor(0.5, 0);
             this.timer_text.affix_ui();
             this.timer_text.set_depth(this.overlay_depth);
@@ -412,7 +406,7 @@ export default class CombatRenderer {
             case 5:
                 this.render_context.display_notification('The bodies of fallen units will remain, and present an obstacle that cannot be moved through. The goal of each match is to finish each unit your opponent controls. Try to complete the match.');
                 break;
-            case 6: 
+            case 6:
                 this.render_context.hide_notification();
                 break;
         }

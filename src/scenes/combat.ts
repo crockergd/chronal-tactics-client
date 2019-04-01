@@ -59,7 +59,7 @@ export default class Combat extends AbstractScene {
 
         this.renderer = new CombatRenderer(this.render_context, this.settings, this.stage.height);
 
-        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient');
+        const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient', null, true);
         bg.affix_ui();
 
         this.renderer.render_stage(this.stage);

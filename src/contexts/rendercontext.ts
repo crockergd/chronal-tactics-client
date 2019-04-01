@@ -1,10 +1,12 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
-import AbstractContainer from '../abstracts/abstractcontainer';
 import { Textures } from 'phaser';
 import { Vector } from 'turn-based-combat-framework';
 import AbstractGroup from '../abstracts/abstractgroup';
+import * as Constants from '../utils/constants';
+import MathExtensions from '../utils/mathextensions';
+import AbstractButton from '../abstracts/abstractbutton';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -13,7 +15,43 @@ export default class RenderContext {
     private notification_text: AbstractText;
 
     public get buffer(): number {
-        return 10;
+        return this.literal(10);
+    }
+
+    public get buffer_sm(): number {
+        return this.buffer / 2;
+    }
+
+    public get frame_buffer(): number {
+        return this.literal(3);
+    }
+
+    public get frame_buffer_lg(): number {
+        return this.frame_buffer * 2;
+    }
+
+    public get DPR(): number {
+        return window.devicePixelRatio;
+    }
+
+    public get baseline_x(): number {
+        return 640;
+    }
+
+    public get baseline_y(): number {
+        return 360;
+    }
+
+    public get scale_factor(): number {
+        return this.base_scale_factor * this.DPR;
+    }
+
+    public get base_scale_factor(): number {
+        return Math.min((this.width / this.baseline_x), (this.height / this.baseline_y));
+    }
+
+    public get outer_scale_factor(): number {
+        return Math.max((this.width / this.baseline_x), (this.height / this.baseline_y));
     }
 
     public get width(): number {
@@ -31,9 +69,29 @@ export default class RenderContext {
     public get center_y(): number {
         return this.camera.centerY;
     }
-    
+
+    public get origin_x(): number {
+        return (this.width - this.literal(this.baseline_x)) / 2;
+    }
+
+    public get origin_y(): number {
+        return (this.height - this.literal(this.baseline_y)) / 2;
+    }
+
+    public get extent_x(): number {
+        return this.origin_x + this.literal(this.baseline_x);
+    }
+
+    public get extent_y(): number {
+        return this.origin_y + this.literal(this.baseline_y);
+    }
+
     public get camera(): Phaser.Cameras.Scene2D.Camera {
         return this.scene.cameras.main;
+    }
+
+    public literal(literal: number): number {
+        return literal * this.base_scale_factor;
     }
 
     public render_effect(effect_key: string, position: Vector, callback?: Function, context?: any): void {
@@ -47,28 +105,29 @@ export default class RenderContext {
         });
     }
 
-    public add_container(x: number, y: number): AbstractContainer {
-        const container: AbstractContainer = new AbstractContainer(this, this.scene, x, y);
+    public add_group(collection?: AbstractGroup): AbstractGroup {
+        const group_object: AbstractGroup = new AbstractGroup(this, this.scene, collection);
 
-        return container;
+        return group_object;
     }
 
-    public add_group(): AbstractGroup {
-        const group: AbstractGroup = new AbstractGroup(this, this.scene);
-
-        return group;
-    }
-
-    public add_sprite(x: number, y: number, key: string, container?: AbstractContainer | AbstractGroup | Array<any>): AbstractSprite {
-        const sprite_object: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, container);
+    public add_sprite(x: number, y: number, key: string, group?: AbstractGroup, preserve?: boolean): AbstractSprite {
+        const sprite_object: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, group);
+        if (!preserve) sprite_object.set_scale(this.base_scale_factor, this.base_scale_factor);
 
         return sprite_object;
     }
 
-    public add_text(x: number, y: number, text: string, container?: AbstractContainer | AbstractGroup | Array<any>): AbstractText {
-        const text_object: AbstractText = new AbstractText(this, this.scene, x, y, text, container);
+    public add_text(x: number, y: number, text: string, group?: AbstractGroup): AbstractText {
+        const text_object: AbstractText = new AbstractText(this, this.scene, x, y, text, group);
 
         return text_object;
+    }
+
+    public add_button(x: number, y: number, key: string, text?: string, collection?: AbstractGroup): AbstractButton {
+        const button_object: AbstractButton = new AbstractButton(this, this.scene, x, y, key, text, collection);
+
+        return button_object;
     }
 
     public get_sprite_dimensions(key: string): Vector {
@@ -80,9 +139,9 @@ export default class RenderContext {
     public set_notification_position(position: Vector): void {
         this.notification_position = new Vector(position.x, position.y);
         this.notification_text = this.add_text(this.notification_position.x, this.notification_position.y, '');
-        this.notification_text.set_font_size(20);
+        this.notification_text.set_font_size(10);
         this.notification_text.set_anchor(0.5, 0);
-        this.notification_text.set_word_wrap(this.width * 0.7);
+        this.notification_text.set_word_wrap((this.width * 0.7) / this.base_scale_factor);
         this.notification_text.set_depth(position.z);
         this.notification_text.affix_ui();
         this.notification_text.set_visible(false);
@@ -95,5 +154,45 @@ export default class RenderContext {
 
     public hide_notification(): void {
         this.notification_text.set_visible(false);
+    }
+
+    public validate_tolerance(pointer: Phaser.Input.Pointer): boolean {
+        const drift_tolerance: number = this.height / 16;
+        if (MathExtensions.diff(pointer.downX, pointer.upX) > drift_tolerance) return false;
+        if (MathExtensions.diff(pointer.downY, pointer.upY) > drift_tolerance) return false;
+
+        const time_tolerance: number = 1000;
+        if ((pointer.upTime - pointer.downTime) > time_tolerance) return false;
+
+        return true;
+    }
+
+    public bind_event(framework_object: Phaser.GameObjects.GameObject, key: string, callback: Function, context?: any, ...args: Array<any>): string {
+        framework_object.setInteractive();
+        let event_key: string = key;
+
+        if (args && args.length) {
+            event_key += Constants.EVENT_RECAST;
+            framework_object.on(key, (pointer: Phaser.Input.Pointer) => {
+                if (!this.validate_tolerance(pointer)) return;
+
+                framework_object.emit(event_key, ...args);
+            });
+            framework_object.on(event_key, callback, context);
+        } else {
+            event_key += Constants.EVENT_RECAST;
+            if (key === Constants.TAP_EVENT) {
+                framework_object.on(key, (pointer: Phaser.Input.Pointer) => {
+                    if (!this.validate_tolerance(pointer)) return;
+    
+                    framework_object.emit(event_key);
+                });
+                framework_object.on(event_key, callback, context);
+            } else {
+                framework_object.on(key, callback, context);
+            }  
+        }
+
+        return event_key;
     }
 }

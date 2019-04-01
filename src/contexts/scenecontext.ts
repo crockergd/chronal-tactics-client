@@ -16,8 +16,9 @@ export default class SceneContext {
         return this.client_settings;
     }
 
-    constructor() {
+    constructor(scene?: AbstractScene) {
         this._render_context = new RenderContext();
+        if (scene) this.set_scene(scene);
 
         this.client_settings = { };
     }

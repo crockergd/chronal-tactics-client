@@ -1,6 +1,6 @@
 import AbstractSprite from './abstractsprite';
 import AbstractText from './abstracttext';
 import AbstractGroup from './abstractgroup';
-import AbstractContainer from './abstractcontainer';
+import AbstractButton from './abstractbutton';
 
-export type AbstractType = AbstractSprite | AbstractText | AbstractGroup | AbstractContainer;
+export type AbstractType = AbstractSprite | AbstractText | AbstractButton | AbstractGroup;

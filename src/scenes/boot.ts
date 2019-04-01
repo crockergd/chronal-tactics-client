@@ -1,6 +1,9 @@
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import MathExtensions from '../utils/mathextensions';
+import SceneContext from '../contexts/scenecontext';
+import Lobby from './lobby';
+import Combat from './combat';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -10,19 +13,22 @@ export default class Boot extends AbstractScene {
     private firstnames: Array<string>;
 
     public preload(): void {
+        this.scene_context = new SceneContext(this);
+
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
         this.title.framework_object.setAlign('center');
-        this.title.set_font_size(84);
+        this.title.set_font_size(48);
+        this.title.set_stroke(8 / this.render_context.DPR);
         this.title.set_anchor(0.5, 0.5);
-        this.title.set_stroke(6);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
 
         this.load.on('progress', (percentage: number) => {
-            this.subtitle.text = Math.round(percentage * 100) + '%';
+            this.subtitle.text = Math.floor(percentage * 100) + '%';
         });
 
+        this.load_states();
         this.load_assets();
     }
 
@@ -37,9 +43,14 @@ export default class Boot extends AbstractScene {
 
         this.settings.name = (adjective.charAt(0).toUpperCase() + adjective.slice(1)) + ' ' + firstname;
 
-        this.scene.start('lobby', {
+        this.start('lobby', {
             scene_context: this.scene_context
         });
+    }
+
+    private load_states(): void {
+        this.scene.add('lobby', Lobby, false);
+        this.scene.add('combat', Combat, false);
     }
 
     private load_assets(): void {
@@ -64,9 +75,9 @@ export default class Boot extends AbstractScene {
         this.load.json('adjectives', require_json('./adjectives.json'));
         this.load.json('firstnames', require_json('./firstnames.json'));
 
-        const gradient_texture: Phaser.Textures.CanvasTexture = this.textures.createCanvas('gradient', this.render_context.width * 2, this.render_context.height * 2);
+        const gradient_texture: Phaser.Textures.CanvasTexture = this.textures.createCanvas('gradient', this.render_context.width, this.render_context.height);
         const gradient_context: CanvasRenderingContext2D = gradient_texture.getContext();
-        const gradient: CanvasGradient = gradient_context.createLinearGradient(gradient_texture.width / 2, 0, gradient_texture.width / 2, gradient_texture.height);
+        const gradient: CanvasGradient = gradient_context.createLinearGradient(gradient_texture.width / this.render_context.base_scale_factor, 0, gradient_texture.width / this.render_context.base_scale_factor, gradient_texture.height);
 
         gradient.addColorStop(0, '#FFFFFF');
         gradient.addColorStop(1, '#004CB3');
