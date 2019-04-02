@@ -2,6 +2,7 @@ import { GameObjects, Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
 import AbstractGroup from './abstractgroup';
 import { Vector } from 'turn-based-combat-framework';
+import { AbstractCollectionType } from './abstractcollectiontype';
 
 export default class AbstractText {
     private renderer: RenderContext;
@@ -55,7 +56,7 @@ export default class AbstractText {
         this.framework_object.text = text;
     }
 
-    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractGroup) {
+    constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractCollectionType) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         this.set_font_size(16);

@@ -7,6 +7,8 @@ import AbstractGroup from '../abstracts/abstractgroup';
 import * as Constants from '../utils/constants';
 import MathExtensions from '../utils/mathextensions';
 import AbstractButton from '../abstracts/abstractbutton';
+import AbstractContainer from '../abstracts/abstractcontainer';
+import { AbstractCollectionType } from '../abstracts/abstractcollectiontype';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -105,21 +107,27 @@ export default class RenderContext {
         });
     }
 
-    public add_group(collection?: AbstractGroup): AbstractGroup {
-        const group_object: AbstractGroup = new AbstractGroup(this, this.scene, collection);
+    public add_group(group?: AbstractGroup): AbstractGroup {
+        const group_object: AbstractGroup = new AbstractGroup(this, this.scene, group);
 
         return group_object;
     }
 
-    public add_sprite(x: number, y: number, key: string, group?: AbstractGroup, preserve?: boolean): AbstractSprite {
-        const sprite_object: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, group);
+    public add_container(x?: number, y?: number): AbstractContainer {
+        const container_object: AbstractContainer = new AbstractContainer(this, this.scene, x, y);
+
+        return container_object;
+    }
+
+    public add_sprite(x: number, y: number, key: string, collection?: AbstractCollectionType, preserve?: boolean): AbstractSprite {
+        const sprite_object: AbstractSprite = new AbstractSprite(this, this.scene, x, y, key, collection);
         if (!preserve) sprite_object.set_scale(this.base_scale_factor, this.base_scale_factor);
 
         return sprite_object;
     }
 
-    public add_text(x: number, y: number, text: string, group?: AbstractGroup): AbstractText {
-        const text_object: AbstractText = new AbstractText(this, this.scene, x, y, text, group);
+    public add_text(x: number, y: number, text: string, collection?: AbstractCollectionType): AbstractText {
+        const text_object: AbstractText = new AbstractText(this, this.scene, x, y, text, collection);
 
         return text_object;
     }

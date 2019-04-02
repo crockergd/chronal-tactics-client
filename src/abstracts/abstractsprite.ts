@@ -4,6 +4,7 @@ import AbstractScene from './abstractscene';
 import * as Constants from '../utils/constants';
 import AbstractGroup from './abstractgroup';
 import { Vector } from 'turn-based-combat-framework';
+import { AbstractCollectionType } from './abstractcollectiontype';
 
 export default class AbstractSprite {
     private renderer: RenderContext;
@@ -49,7 +50,7 @@ export default class AbstractSprite {
         return this.framework_object.texture.key;
     }
 
-    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, collection?: AbstractGroup) {
+    constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, collection?: AbstractCollectionType) {
         this.renderer = renderer;
         this.framework_object = scene.add.sprite(x, y, key);
         this.set_anchor(0, 0);

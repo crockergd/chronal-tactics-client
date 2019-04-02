@@ -7,6 +7,7 @@ import AbstractSprite from '../abstracts/abstractsprite';
 import { AbstractType } from '../abstracts/abstracttype';
 import AbstractGroup from '../abstracts/abstractgroup';
 import AbstractButton from '../abstracts/abstractbutton';
+import AbstractContainer from '../abstracts/abstractcontainer';
 
 export default class CombatRenderer {
     public container: AbstractGroup;
@@ -15,7 +16,7 @@ export default class CombatRenderer {
 
     public unit_frame_pos: Vector;
     public unit_frame: AbstractSprite;
-    public unit_ui: AbstractGroup;
+    public unit_ui: AbstractContainer;
     public deploy_ui: AbstractGroup;
     public deploy_unit: AbstractSprite;
     public deploy_classes: Array<AbstractSprite>;
@@ -224,7 +225,7 @@ export default class CombatRenderer {
     }
 
     public render_deployment_ui(deployment_tiles: Array<Vector>): void {
-        this.unit_ui = this.render_context.add_group();
+        this.unit_ui = this.render_context.add_container();
         this.unit_ui.set_depth(this.overlay_depth);
         this.deploy_ui = this.render_context.add_group();
 
@@ -264,8 +265,6 @@ export default class CombatRenderer {
         this.deploy_stat_text.set_anchor(0.5, 0);
         this.deploy_stat_text.set_depth(this.overlay_depth);
 
-
-
         this.ready_btn = this.render_context.add_button(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 3), 'generic_btn', 'Ready', this.deploy_ui);
         // this.ready_btn.set_scale(2, 2);
         this.ready_btn.affix_ui();
@@ -287,18 +286,18 @@ export default class CombatRenderer {
 
     public display_deployment_ui(show: boolean): void {
         this.ready_btn.set_visible(show);
-        const value: number =  (this.unit_frame.width - (this.render_context.buffer * 2));
+        const value: number = (this.unit_frame.width - (this.render_context.buffer * 2));
         if (!show) {
             this.render_context.scene.tweens.add({
-                targets: this.unit_ui.children_framework_objects,
-                x: '+=' + value.toString(),
+                targets: this.unit_ui.framework_object,
+                x: this.unit_frame_pos.x + value,
                 duration: 600,
                 ease: 'Power2'
             });
         } else {
             this.render_context.scene.tweens.add({
-                targets: this.unit_ui.children_framework_objects,
-                x: '-=' + value.toString(),
+                targets: this.unit_ui.framework_object,
+                x: this.unit_frame_pos.x,
                 duration: 600,
                 ease: 'Power2'
             });
@@ -331,7 +330,7 @@ export default class CombatRenderer {
 
     public render_timer(timer: number, interval: number): void {
         if (!this.timer_text) {
-            this.timer_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer, '');
+            this.timer_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer_sm, '');
             this.timer_text.set_font_size(16);
             this.timer_text.set_anchor(0.5, 0);
             this.timer_text.affix_ui();
@@ -372,18 +371,16 @@ export default class CombatRenderer {
         alpha_fill.setDepth(this.overlay_depth);
 
         const title: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, team_string);
-        title.set_font_size(96);
+        title.set_font_size(48);
         title.set_anchor(0.5, 0.5);
         title.affix_ui();
         title.set_depth(this.overlay_depth);
-        title.set_stroke(6);
+        title.set_stroke(8 / this.render_context.DPR);
 
         const subtitle: AbstractText = this.render_context.add_text(this.render_context.center_x, title.y + title.height, completed_string);
-        subtitle.set_font_size(72);
         subtitle.set_anchor(0.5, 0.5);
         subtitle.affix_ui();
         subtitle.set_depth(this.overlay_depth);
-        subtitle.set_stroke(6);
     }
 
     public advance_tutorial(step: number): void {
