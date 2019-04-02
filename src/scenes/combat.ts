@@ -360,13 +360,8 @@ export default class Combat extends AbstractScene {
             if (!pointer.isDown) return;
             if (this.movement_entity) return;
 
-            const scroll_x: number = (this.movement_x - pointer.x) / 2;
-            const scroll_y: number = (this.movement_y - pointer.y) / 2;
-
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
-
-            this.render_context.camera.setScroll(this.render_context.camera.scrollX + scroll_x, this.render_context.camera.scrollY + scroll_y);
         }, this);
     }
 

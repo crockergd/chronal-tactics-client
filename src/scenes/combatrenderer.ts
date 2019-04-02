@@ -156,20 +156,6 @@ export default class CombatRenderer {
 
         const center_world: Vector = this.local_to_world(stage.get_center());
         this.render_context.camera.centerOn(center_world.x, center_world.y);
-
-        // let bounds_x: number = 0;
-        // let bounds_y: number = 0;
-        // const bounds_width: number = (tile_dimensions.x * 2) + (center_stage_x * 2);
-        // const bounds_height: number = (tile_dimensions.y * 2) + (center_stage_y * 2);
-
-        // if (this.scene.cameras.main.width > bounds_width) {
-        //     bounds_x = -((this.scene.cameras.main.width - bounds_width) / 2);
-        // }
-        // if (this.scene.cameras.main.height > bounds_height) {
-        //     bounds_y = -((this.scene.cameras.main.height - bounds_height) / 2);
-        // }
-
-        // this.scene.cameras.main.setBounds(bounds_x, bounds_y, bounds_width, bounds_height);
     }
 
     public render_entities(stage: Stage): void {

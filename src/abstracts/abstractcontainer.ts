@@ -34,6 +34,18 @@ export default class AbstractContainer {
         this.framework_object.setDepth(depth);
     }
 
+    public set_visible(visible: boolean): void {
+        this.framework_object.setVisible(visible);
+    }
+
+    public set_alpha(alpha: number): void {
+        this.framework_object.setAlpha(alpha);
+    }
+
+    public affix_ui(): void {
+        this.framework_object.setScrollFactor(0, 0);
+    }
+
     public add(child: AbstractSprite | AbstractText): void {
         this.framework_object.add(child.framework_object);
     }
