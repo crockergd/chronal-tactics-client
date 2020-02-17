@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="me.radbee.isochronaltactics" version="1.0.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Isochronal Tactics</name>
+<widget id="io.radbee.chronaltactics" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Chronal Tactics</name>
     <description>
-        Isochronal Tactics is a multiplayer, turn-based real-time strategy combat game.
+        Chronal Tactics is a multiplayer, turn-based real-time strategy combat game.
     </description>
-    <author email="g.crocker3@gmail.com" href="https://radbee.me/">
+    <author email="g.crocker3@gmail.com" href="https://radicalbumble.com/">
         George Crocker
     </author>
     <content src="index.html" />

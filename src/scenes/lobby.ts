@@ -27,7 +27,7 @@ export default class Lobby extends AbstractScene {
 
         const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient', null, true);
 
-        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
+        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(48);
         this.title.set_stroke(8 / this.render_context.DPR);
@@ -122,7 +122,7 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio('https://radbee.me:3010');
+        this.socket = Sio.connect('https://games.radbee.io');
         // this.socket = Sio('localhost:3010');
     }
 }

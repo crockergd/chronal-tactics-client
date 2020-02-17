@@ -15,7 +15,7 @@ export default class Boot extends AbstractScene {
     public preload(): void {
         this.scene_context = new SceneContext(this);
 
-        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Isochronal Tactics');
+        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(48);
         this.title.set_stroke(8 / this.render_context.DPR);
@@ -83,7 +83,7 @@ export default class Boot extends AbstractScene {
         gradient.addColorStop(1, '#004CB3');
 
         gradient_texture.getContext().fillStyle = gradient;
-        gradient_texture.getContext().fillRect(0, 0, gradient_texture.width, gradient_texture.height);
+        gradient_texture.getContext().fillRect(0, 0, gradient_texture.width * 2, gradient_texture.height * 2);
 
         gradient_texture.refresh();
     }
