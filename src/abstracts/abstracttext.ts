@@ -1,17 +1,26 @@
 import { GameObjects, Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
-import AbstractGroup from './abstractgroup';
-import { Vector } from 'turn-based-combat-framework';
+import Vector from '../utils/vector';
 import { AbstractCollectionType } from './abstractcollectiontype';
+import AbstractGroup from './abstractgroup';
+import MathExtensions from '../utils/mathextensions';
 
 export default class AbstractText {
     private renderer: RenderContext;
     private parent?: AbstractGroup;
     public framework_object: GameObjects.Text;
 
-    private readonly STYLE: object = {
+    private _max_width;
+    private _max_height;
+    private _original_size;
+
+    private readonly STYLE: any = {
         fontFamily: 'silkscreennormal, Arial',
         fill: '#fff'
+    }
+
+    get literals(): Array<GameObjects.GameObject> {
+        return [this.framework_object];
     }
 
     get position(): Vector {
@@ -48,30 +57,38 @@ export default class AbstractText {
         return this.framework_object.alpha;
     }
 
+    get font_size(): number {
+        return parseInt(this.framework_object.style.fontSize) / this.renderer.base_scale_factor;
+    }
+
     get text(): string {
         return this.framework_object.text;
     }
 
     set text(text: string) {
+        if (this.framework_object.text === text) return;
         this.framework_object.text = text;
+        this.resize();
     }
 
     constructor(renderer: RenderContext, scene: Scene, x: number, y: number, text: string, container?: AbstractCollectionType) {
         this.renderer = renderer;
         this.framework_object = scene.add.text(x, y, text, this.STYLE);
         this.set_font_size(16);
-        // this.framework_object.lineSpacing = -4;
-
-        if (this.renderer.ui_camera) this.renderer.ui_camera.ignore(this.framework_object);
 
         if (container) {
             container.add(this);
         }
     }
 
-    public set_font_size(font_size: number): void {
-        this.framework_object.setFontSize(this.renderer.literal(font_size));
-        this.set_stroke((font_size / 3) / this.renderer.DPR);
+    public set_font_size(font_size: number, no_resize?: boolean): void {
+        const resolved_size: number = Math.round(this.renderer.literal(font_size));
+        this.framework_object.setFontSize(resolved_size);
+
+        const stroke_size: number = Math.min((resolved_size / 12), this.renderer.literal(2));
+        this.set_stroke(stroke_size);
+
+        if (!no_resize) this.resize();
     }
 
     public set_stroke(stroke_size: number): void {
@@ -82,11 +99,19 @@ export default class AbstractText {
         this.framework_object.setWordWrapWidth(this.renderer.literal(wrap_width));
     }
 
-    public set_position(x: number, y: number, relative: boolean = false): void {
-        if (relative) {
-            this.framework_object.setPosition(this.framework_object.x + x, this.framework_object.y + y);
+    public set_position(x: number, y: number, relative: boolean = false, micro: boolean = false): void {
+        if (micro) {
+            if (relative) {
+                this.framework_object.setPosition(this.framework_object.x + x, this.framework_object.y + y);
+            } else {
+                this.framework_object.setPosition(x, y);
+            }
         } else {
-            this.framework_object.setPosition(x, y);
+            if (relative) {
+                this.framework_object.setPosition(this.framework_object.x + x, this.framework_object.y + y);
+            } else {
+                this.framework_object.setPosition(x, y);
+            }
         }
     }
 
@@ -123,12 +148,38 @@ export default class AbstractText {
         this.parent = parent;
     }
 
+    public set_italic(): void {
+        this.framework_object.setFontStyle('italic');
+    }
+
+    public set_max_width(width: number): void {
+        this._original_size = this.font_size;
+        this._max_width = width;
+        this.resize();
+    }
+
+    public set_max_height(height: number): void {
+        this._max_height = height;
+        this.resize();
+    }
+
     public affix_ui(): void {
-        if (this.renderer.ui_camera) {
-            this.framework_object.cameraFilter &= ~this.renderer.ui_camera.id;
-            this.renderer.camera.ignore(this.framework_object);
-        } else {
-            this.set_scroll(0, 0);
+        this.set_scroll(0, 0);
+    }
+
+    private resize(): void {
+        if (this._max_width) {
+            this.set_font_size(this._original_size, true);
+
+            while (this.width > this._max_width) {
+                this.set_font_size(this.font_size - 1, true);
+            }
+        }
+
+        if (this._max_height) {
+            while (this.height > this._max_height) {
+                this.framework_object.setLineSpacing(this.framework_object.lineSpacing - 1);
+            }
         }
     }
 

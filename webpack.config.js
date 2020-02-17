@@ -72,7 +72,7 @@ module.exports = function () {
 
         devServer: {
             contentBase: path.join(__dirname, 'www'),
-            port: 3001,
+            port: 3002,
             inline: true,
             compress: true,
             watchOptions: {

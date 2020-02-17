@@ -1,18 +1,19 @@
 import RenderContext from '../contexts/rendercontext';
 import { GameObjects } from 'phaser';
 import AbstractScene from './abstractscene';
+import { AbstractCollectionType } from './abstractcollectiontype';
 import * as Constants from '../utils/constants';
 import AbstractGroup from './abstractgroup';
-import { Vector } from 'turn-based-combat-framework';
-import { AbstractCollectionType } from './abstractcollectiontype';
+import Vector from '../utils/vector';
 
 export default class AbstractSprite {
     private renderer: RenderContext;
     private parent?: AbstractGroup;
+    private _frame: number;
     public framework_object: GameObjects.Sprite;
 
-    get position(): Vector {
-        return new Vector(this.x, this.y);
+    get literals(): Array<GameObjects.GameObject> {
+        return [this.framework_object];
     }
 
     get x(): number {
@@ -23,6 +24,10 @@ export default class AbstractSprite {
     get y(): number {
         const parent_adjust: number = this.parent ? this.parent.absolute_y : 0;
         return this.absolute_y - parent_adjust;
+    }
+
+    get position(): Vector {
+        return new Vector(this.x, this.y);
     }
 
     get absolute_x(): number {
@@ -45,13 +50,27 @@ export default class AbstractSprite {
         return this.framework_object.displayHeight; // / this.renderer.DPR;
     }
 
+    get width_half(): number {
+        return this.width / 2;
+    }
+
+    get height_half(): number {
+        return this.height / 2;
+    }
+
     get key(): string {
         if (!this.framework_object) return null;
         return this.framework_object.texture.key;
     }
 
+    get frame(): number {
+        return this._frame;
+    }
+
     constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, collection?: AbstractCollectionType) {
         this.renderer = renderer;
+        this._frame = 0;
+
         this.framework_object = scene.add.sprite(x, y, key);
         this.set_anchor(0, 0);
 
@@ -73,12 +92,19 @@ export default class AbstractSprite {
         this.framework_object.scaleY *= y;
     }
 
+    public set_rotation(degrees: number): void {
+        const radians: number = degrees * (Math.PI / 180);
+        this.framework_object.setRotation(radians);
+    }
+
     public set_anchor(x: number, y: number): void {
         this.framework_object.setOrigin(x, y);
     }
 
     public set_frame(frame: number): void {
+        if (this._frame === frame) return;
         this.framework_object.setFrame(frame);
+        this._frame = frame;
     }
 
     public set_visible(visible: boolean): void {
@@ -109,20 +135,28 @@ export default class AbstractSprite {
     }
 
     public affix_ui(): void {
-        if (this.renderer.ui_camera) {
-            this.framework_object.cameraFilter &= ~this.renderer.ui_camera.id;
-            this.renderer.camera.ignore(this.framework_object);
-        } else {
-            this.set_scroll(0, 0);
-        }
+        this.set_scroll(0, 0);
+    }
+
+    public flag_cachable(): void {
+        this.framework_object.ignoreDestroy = true;
     }
 
     public crop(x: number, y: number, width: number, height: number): void {
+        // FIREFOX can't handle crops with a value of 0, for web testing
+        if (this.renderer.scene.game.device.browser.firefox) {
+            if (width === 0) width = 1;
+            if (height === 0) height = 1;
+        }
         this.framework_object.setCrop(x, y, width, height);
     }
 
     public flip_x(): void {
         this.framework_object.flipX = !this.framework_object.flipX;
+    }
+
+    public flip_y(): void {
+        this.framework_object.flipY = !this.framework_object.flipY;
     }
 
     public on(key: string, callback: Function, context?: any, ...args: Array<any>): string {

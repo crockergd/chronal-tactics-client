@@ -1,19 +1,23 @@
 const css: any = require('../assets/styles/style.css');
 import AbstractGame from './abstracts/abstractgame';
+import * as Constants from './utils/constants';
 
 {
-    let width: number = window.innerWidth;
-    let height: number = window.innerHeight
+    const width: number = window.innerWidth;
+    const height: number = window.innerHeight;
+    const dpr: number = window.devicePixelRatio;
 
-    let dpr: number = window.devicePixelRatio;
-
-    const config: GameConfig = {
+    const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.CANVAS,
-        width: width,
-        height: height,
-        resolution: dpr,
+        backgroundColor: '#030303',
         render: {
             pixelArt: true,
+            transparent: false
+        },
+        scale: {
+            width: width,
+            height: height,
+            resolution: dpr
         }
     };
 

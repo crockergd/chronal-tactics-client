@@ -30,7 +30,6 @@ export default class Lobby extends AbstractScene {
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(48);
-        this.title.set_stroke(8 / this.render_context.DPR);
         this.title.set_anchor(0.5, 0.5);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');

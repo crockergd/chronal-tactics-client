@@ -1,25 +1,23 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs",
         "lib": [
             "dom",
             "es2017",
             "scripthost"
         ],
         "sourceMap": true,
-        "outDir": "./www",
-        "strict": true,        
-        "strictNullChecks": false,
-        "strictFunctionTypes": false,
-        "strictPropertyInitialization": false,
-        "esModuleInterop": true
+        "moduleResolution": "node",
+        "isolatedModules": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "esModuleInterop": true,
+        "outDir": "./www"
     },
-    "files": [
-        "./vendor/phaser.d.ts"
-    ],
     "include": [
-        "src/**/*"
+        "src/**/*.ts",
+        "typings/*.d.ts"
     ],
     "exclude": [
         "**/*.spec.ts"

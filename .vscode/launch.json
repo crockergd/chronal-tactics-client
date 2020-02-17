@@ -8,16 +8,20 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "http://localhost:3001/",
-            "webRoot": "${workspaceRoot}",
+            "url": "http://localhost:3002/",
+            "webRoot": "${workspaceRoot}/www",
             "userDataDir": "${workspaceRoot}/.vscode/chrome",
-            "sourceMaps": true,
-            "smartStep": true,
-            "trace": true,
             "internalConsoleOptions": "openOnSessionStart",
             "runtimeArgs": [
                 "--app-auto-launched"
-            ]
+            ],
+            "disableNetworkCache": true,
+            "sourceMapPathOverrides": {
+                "webpack:///*": "${webRoot}/../*",
+                "webpack:///./*": "${webRoot}/../*",
+                "webpack:///src/*": "${webRoot}/../src/*",
+                "webpack:///./~/*": "${webRoot}/../node_modules/*"
+            }
         },
         {
             "name": "Run Android on device",
@@ -31,6 +35,6 @@
             "ionicLiveReload": false,
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "webpack-mobile"
-        },
+        }
     ]
 }

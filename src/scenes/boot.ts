@@ -15,6 +15,8 @@ export default class Boot extends AbstractScene {
     public preload(): void {
         this.scene_context = new SceneContext(this);
 
+        this.game.scale.setGameSize(this.render_context.width * this.render_context.DPR, this.render_context.height * this.render_context.DPR);
+
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
         this.title.framework_object.setAlign('center');
         this.title.set_font_size(48);

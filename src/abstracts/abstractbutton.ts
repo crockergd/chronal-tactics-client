@@ -3,7 +3,7 @@ import AbstractScene from './abstractscene';
 import AbstractGroup from './abstractgroup';
 import AbstractText from './abstracttext';
 import AbstractSprite from './abstractsprite';
-import { Vector } from 'turn-based-combat-framework';
+import Vector from '../utils/vector';
 
 export default class AbstractButton {
     private renderer: RenderContext;

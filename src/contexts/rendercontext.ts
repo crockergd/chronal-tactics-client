@@ -49,11 +49,15 @@ export default class RenderContext {
     }
 
     public get base_scale_factor(): number {
-        return Math.min((this.width / this.baseline_x), (this.height / this.baseline_y));
+        return (Math.min((this.width / this.baseline_x), (this.height / this.baseline_y)));
     }
 
     public get outer_scale_factor(): number {
-        return Math.max((this.width / this.baseline_x), (this.height / this.baseline_y));
+        return (Math.max((this.width / this.baseline_x), (this.height / this.baseline_y)));
+    }
+
+    public get inner_scale_factor(): number {
+        return 1 + (this.outer_scale_factor - this.base_scale_factor);
     }
 
     public get width(): number {
@@ -192,13 +196,13 @@ export default class RenderContext {
             if (key === Constants.TAP_EVENT) {
                 framework_object.on(key, (pointer: Phaser.Input.Pointer) => {
                     if (!this.validate_tolerance(pointer)) return;
-    
+
                     framework_object.emit(event_key);
                 });
                 framework_object.on(event_key, callback, context);
             } else {
                 framework_object.on(key, callback, context);
-            }  
+            }
         }
 
         return event_key;
