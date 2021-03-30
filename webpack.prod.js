@@ -2,17 +2,22 @@ const path = require('path');
 const webpack = require('webpack');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = function () {
+module.exports = () => {
+    const entry_file = 'app-mobile';
+    const template_file = 'index-mobile.ejs';
+
     const config = {
         mode: 'production',
 
-        entry: './src/index.ts',
+        entry: path.join(__dirname, 'src', entry_file),
 
         output: {
             path: path.resolve(__dirname, 'www'),
-            filename: 'bundle.js'
+            filename: 'bundle.js',
+            assetModuleFilename: 'assets/[hash][ext][query]'
         },
 
         resolve: {
@@ -22,41 +27,45 @@ module.exports = function () {
         module: {
             rules: [
                 {
-                    test: /\.(woff|woff2|eot|ttf)$/,
-                    use: ['url-loader?limit=100000'],
+                    test: /\.(png)$/,
+                    type: 'asset/resource',
                     include: [
-                        path.resolve(__dirname, 'assets/fonts')
+                        path.resolve(__dirname, 'assets/images'),
+                        path.resolve(__dirname, 'assets/tilesheets')
                     ]
+                },
+                {
+                    test: /\.(woff|woff2|eot|ttf|otf)$/,
+                    type: 'asset/resource',
+                    include: path.resolve(__dirname, 'assets/fonts')
                 },
                 {
                     test: /\.css$/,
-                    loader: 'style-loader!css-loader',
-                    include: [
-                        path.resolve(__dirname, 'assets/styles')
-                    ]
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ],
+                    include: path.resolve(__dirname, 'assets/styles')
                 },
                 {
-                    type: "javascript/auto",
-                    test: /\.(png|json)$/,
-                    loader: 'file-loader?name=assets/[hash].[ext]',
-                    include: [
-                        path.resolve(__dirname, 'assets/')
-                    ]
+                    test: /\.(wav|mp3|ogg)$/,
+                    type: 'asset/resource',
+                    include: path.resolve(__dirname, 'assets/audio')
                 },
                 {
                     test: /\.ts$/,
                     loader: 'ts-loader',
-                    include: [
-                        path.resolve(__dirname, 'src/')
-                    ]
+                    include: path.resolve(__dirname, 'src/')
                 }
             ]
         },
 
         plugins: [
+            new CleanWebpackPlugin(),
+
             new HtmlWebpackPlugin({
                 title: 'Chronal Tactics',
-                template: path.resolve(__dirname, 'templates', 'index.ejs')
+                template: path.join(__dirname, 'templates', template_file)
             }),
 
             new webpack.DefinePlugin({
@@ -64,14 +73,19 @@ module.exports = function () {
             })
         ],
 
+        // devtool: 'source-map',
         optimization: {
             minimizer: [
-                new UglifyJsPlugin({
-                    uglifyOptions: {
-                        keep_fnames: true
-                    }
-                })
-            ]
+                new TerserPlugin({
+                    terserOptions: {
+                        keep_classnames: true,
+                        keep_fnames: true,
+                        output: {
+                            comments: false
+                        }
+                    },
+                }),
+            ],
         }
     };
 
