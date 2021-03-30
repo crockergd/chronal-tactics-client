@@ -101,7 +101,7 @@ export default class Combat extends AbstractScene {
         });
 
         this.socket.on('battle-completed', (payload: any) => {
-            // this.socket.removeAllListeners();
+            this.socket.off();
             this.input.removeAllListeners();
 
             this.scene_renderer.render_battle_completed(payload.winning_team);
@@ -372,6 +372,7 @@ export default class Combat extends AbstractScene {
 
     private drop_to_lobby(): void {
         //if (this.socket) this.socket.removeAllListeners();
+        if (this.socket) this.socket.off();
         this.input.removeAllListeners();
 
         this.start('lobby', {

@@ -175,6 +175,22 @@ export default class CombatRenderer {
         }
     }
 
+    public render_banner(): void {
+        const highlight: AbstractSprite = this.render_context.add_sprite(this.render_context.center_x, this.render_context.center_y, 'highlight');
+        highlight.set_scale(0.9, 0.5);
+        highlight.set_anchor(0.5, 0.5);
+        highlight.affix_ui();
+        highlight.set_depth(100);
+
+        const text: AbstractText = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y, 'CHRONAL\nTACTICS');
+        text.set_font_size(64);
+        text.set_anchor(0.5, 0.5);
+        text.framework_object.setLineSpacing(0);
+        text.affix_ui();
+        text.set_depth(100);
+        text.framework_object.setAlign('center');
+    }
+
     public render_team_ui(): void {
         const is_blue: boolean = this.settings.team === 0;
         const title_size: number = 16;

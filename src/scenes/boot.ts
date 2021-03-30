@@ -4,6 +4,8 @@ import MathExtensions from '../utils/mathextensions';
 import SceneContext from '../contexts/scenecontext';
 import Lobby from './lobby';
 import Combat from './combat';
+import CanvasExtensions from '../utils/canvasextensions';
+import Color from '../utils/color';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -35,6 +37,8 @@ export default class Boot extends AbstractScene {
     }
 
     public create(): void {
+        this.load_derived();
+
         this.register_animations();
 
         const adjectives: Array<string> = this.cache.json.get('adjectives').adjectives;
@@ -88,6 +92,10 @@ export default class Boot extends AbstractScene {
         gradient_texture.getContext().fillRect(0, 0, gradient_texture.width * 2, gradient_texture.height * 2);
 
         gradient_texture.refresh();
+    }
+
+    private load_derived(): void {
+        CanvasExtensions.radial_gradient(this, 'highlight', 600, 600, new Color(0, 0, 0, 0.6), new Color(0, 0, 0, 0));
     }
 
     private register_animations(): void {
