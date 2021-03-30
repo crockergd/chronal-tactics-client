@@ -6,8 +6,13 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = () => {
-    const entry_file = 'app-mobile';
-    const template_file = 'index-mobile.ejs';
+    let entry_file = 'app-browser';
+    let template_file = 'index-browser.ejs';
+
+    if (process.env.platform && process.env.platform == 'mobile') {
+        entry_file = 'app-mobile';
+        template_file = 'index-mobile.ejs';
+    }
 
     const config = {
         mode: 'production',
