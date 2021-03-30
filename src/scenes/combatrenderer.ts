@@ -252,7 +252,7 @@ export default class CombatRenderer {
         this.deploy_stat_text.set_anchor(0.5, 0);
         this.deploy_stat_text.set_depth(this.overlay_depth);
 
-        this.ready_btn = this.render_context.add_button(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 3), 'generic_btn', 'Ready', this.deploy_ui);
+        this.ready_btn = this.render_context.add_button(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 2), 'generic_btn', 'Ready', this.deploy_ui);
         // this.ready_btn.set_scale(2, 2);
         this.ready_btn.affix_ui();
         this.ready_btn.set_visible(false);

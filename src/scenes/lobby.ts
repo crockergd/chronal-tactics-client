@@ -3,6 +3,7 @@ import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
 import AbstractButton from '../abstracts/abstractbutton';
+import * as Constants from '../utils/constants';
 
 enum LobbyState {
     IDLE,
@@ -121,7 +122,6 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = io('https://chronal.radicalbumble.com');
-        // this.socket = io('localhost:3010');
+        this.socket = io(Constants.SERVER_ADDR);
     }
 }

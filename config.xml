@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.radbee.chronaltactics" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.radicalbumble.chronaltactics" version="0.0.3" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Chronal Tactics</name>
     <description>
         Chronal Tactics is a multiplayer, turn-based real-time strategy combat game.
@@ -16,5 +16,9 @@
     <plugin name="cordova-plugin-screen-orientation" spec="^3.0.1" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <platform name="android">
+        <resource-file src="styles.xml" target="app/src/main/res/values/styles.xml" />
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/activity">
+            <activity android:theme="@style/FullscreenNotch" />
+        </edit-config> 
     </platform>
 </widget>

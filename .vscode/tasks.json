@@ -11,7 +11,7 @@
                     "platform": "browser"
                 }
             },
-            "command": "./node_modules/.bin/webpack --config webpack.config.js"
+            "command": "./node_modules/.bin/webpack --config webpack.dev.js"
         },
         {
             "type": "shell",
@@ -21,7 +21,7 @@
                     "platform": "mobile"
                 }
             },
-            "command": "./node_modules/.bin/webpack --config webpack.config.js"
+            "command": "./node_modules/.bin/webpack --config webpack.dev.js"
         }
     ]
 }

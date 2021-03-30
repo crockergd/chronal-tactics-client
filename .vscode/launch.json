@@ -5,23 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "type": "pwa-chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "name": "Launch Chrome against localhost:3002",
             "url": "http://localhost:3002/",
-            "webRoot": "${workspaceRoot}/www",
             "userDataDir": "${workspaceRoot}/.vscode/chrome",
             "internalConsoleOptions": "openOnSessionStart",
+            "smartStep": true,
             "runtimeArgs": [
                 "--app-auto-launched"
-            ],
-            "disableNetworkCache": true,
-            "sourceMapPathOverrides": {
-                "webpack:///*": "${webRoot}/../*",
-                "webpack:///./*": "${webRoot}/../*",
-                "webpack:///src/*": "${webRoot}/../src/*",
-                "webpack:///./~/*": "${webRoot}/../node_modules/*"
-            }
+            ]
         },
         {
             "name": "Run Android on device",

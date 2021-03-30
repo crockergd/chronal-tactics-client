@@ -17,7 +17,7 @@ export default class RenderContext {
     private notification_text: AbstractText;
 
     public get buffer(): number {
-        return this.literal(10);
+        return this.literal(20);
     }
 
     public get buffer_sm(): number {
