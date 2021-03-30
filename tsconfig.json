@@ -20,6 +20,6 @@
         "typings/*.d.ts"
     ],
     "exclude": [
-        "**/*.spec.ts"
+        "node_modules"
     ]
 }

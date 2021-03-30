@@ -1,28 +1,26 @@
 const css: any = require('../assets/styles/style.css');
 import AbstractGame from './abstracts/abstractgame';
+import * as Constants from './utils/constants';
 
 {
     let lockOrientation: any = (<any>screen).lockOrientation || (<any>screen).mozLockOrientation || (<any>screen).msLockOrientation || (<any>screen).orientation.lock;
     if (lockOrientation) lockOrientation('landscape'); // allow device rotation
 
-    const width: number = screen.width;
-    const height: number = screen.height;
     const dpr: number = window.devicePixelRatio;
 
     const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.CANVAS,
-        backgroundColor: '#030303',
-        banner: false,
+        type: Phaser.AUTO,
         render: {
             pixelArt: true,
             transparent: false
         },
+        banner: {
+            hidePhaser: true
+        },
         scale: {
             mode: Phaser.Scale.FIT,
-            width: width,
-            height: height,
-            resolution: dpr,
-            autoRound: false
+            width: '100%', 
+            height: '100%'
         }
     };
 

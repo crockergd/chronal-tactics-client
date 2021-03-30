@@ -1,4 +1,4 @@
-import Sio from 'socket.io-client';
+import { io } from 'socket.io-client';
 import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
@@ -121,7 +121,7 @@ export default class Lobby extends AbstractScene {
     }
 
     private connect(): void {
-        this.socket = Sio.connect('https://games.radbee.io');
-        // this.socket = Sio('localhost:3010');
+        this.socket = io('https://chronal.radicalbumble.com');
+        // this.socket = io('localhost:3010');
     }
 }

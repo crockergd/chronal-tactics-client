@@ -2,10 +2,11 @@ import SceneContext from '../contexts/scenecontext';
 import { Scene } from 'phaser';
 import RenderContext from '../contexts/rendercontext';
 import ClientSettings from '../utils/clientsettings';
+import { Socket } from 'socket.io-client';
 
 export default class AbstractScene extends Scene {
     public scene_context: SceneContext;
-    protected socket: SocketIOClient.Socket;
+    protected socket: Socket;
     protected combat_data: any;
 
     public get render_context(): RenderContext {
