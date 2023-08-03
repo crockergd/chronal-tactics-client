@@ -5,11 +5,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = () => {
+module.exports = (env) => {
     let entry_file = 'app-browser';
     let template_file = 'index-browser.ejs';
 
-    if (process.env.platform && process.env.platform == 'mobile') {
+    if (env.platform && env.platform == 'mobile') {
         entry_file = 'app-mobile';
         template_file = 'index-mobile.ejs';
     }
@@ -22,7 +22,8 @@ module.exports = () => {
         output: {
             path: path.resolve(__dirname, 'www'),
             filename: 'bundle.js',
-            assetModuleFilename: 'assets/[hash][ext][query]'
+            assetModuleFilename: 'assets/[hash][ext][query]',
+            pathinfo: false
         },
 
         resolve: {
@@ -32,11 +33,12 @@ module.exports = () => {
         module: {
             rules: [
                 {
-                    test: /\.(png)$/,
+                    test: /\.(png|xml|fnt)$/,
                     type: 'asset/resource',
                     include: [
                         path.resolve(__dirname, 'assets/images'),
-                        path.resolve(__dirname, 'assets/tilesheets')
+                        path.resolve(__dirname, 'assets/tilesheets'),
+                        path.resolve(__dirname, 'assets/bitmap')
                     ]
                 },
                 {
@@ -60,7 +62,10 @@ module.exports = () => {
                 {
                     test: /\.ts$/,
                     loader: 'ts-loader',
-                    include: path.resolve(__dirname, 'src/')
+                    include: path.resolve(__dirname, 'src/'),
+                    options: {
+                        transpileOnly: true
+                    }
                 }
             ]
         },
@@ -74,7 +79,8 @@ module.exports = () => {
             }),
 
             new webpack.DefinePlugin({
-                "typeof PLUGIN_FBINSTANT": JSON.stringify(false)
+                "typeof PLUGIN_FBINSTANT": JSON.stringify(false),
+                BUILD_PRODUCTION: JSON.stringify(true)
             })
         ],
 
@@ -95,4 +101,4 @@ module.exports = () => {
     };
 
     return config;
-}
+};
