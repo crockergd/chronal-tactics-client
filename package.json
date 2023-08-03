@@ -1,6 +1,6 @@
 {
     "name": "chronal-tactics-client",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "author": "George Crocker <g.crocker3@gmail.com>",
     "repository": {
         "type": "git",
