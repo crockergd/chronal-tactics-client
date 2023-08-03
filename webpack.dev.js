@@ -8,7 +8,7 @@ module.exports = (env) => {
     let entry_file = 'app-browser';
     let template_file = 'index-browser.ejs';
 
-    if (process.env.platform && process.env.platform == 'mobile') {
+    if (env.platform && env.platform == 'mobile') {
         entry_file = 'app-mobile';
         template_file = 'index-mobile.ejs';
     }
@@ -21,7 +21,8 @@ module.exports = (env) => {
         output: {
             path: path.resolve(__dirname, 'www'),
             filename: 'bundle.js',
-            assetModuleFilename: 'assets/[hash][ext][query]'
+            assetModuleFilename: 'assets/[hash][ext][query]',
+            pathinfo: false
         },
 
         resolve: {
@@ -32,11 +33,12 @@ module.exports = (env) => {
         module: {
             rules: [
                 {
-                    test: /\.(png)$/,
+                    test: /\.(png|xml|fnt)$/,
                     type: 'asset/resource',
                     include: [
                         path.resolve(__dirname, 'assets/images'),
-                        path.resolve(__dirname, 'assets/tilesheets')
+                        path.resolve(__dirname, 'assets/tilesheets'),
+                        path.resolve(__dirname, 'assets/bitmap')
                     ]
                 },
                 {
@@ -60,7 +62,10 @@ module.exports = (env) => {
                 {
                     test: /\.ts$/,
                     loader: 'ts-loader',
-                    include: path.resolve(__dirname, 'src/')
+                    include: path.resolve(__dirname, 'src/'),
+                    options: {
+                        transpileOnly: false
+                    }
                 }
             ]
         },
@@ -80,12 +85,9 @@ module.exports = (env) => {
 
         devtool: 'eval-source-map',
         devServer: {
-            contentBase: path.join(__dirname, 'www'),
             port: 3002,
-            compress: true,
-            watchOptions: {
-                aggregateTimeout: 300,
-                ignored: /node_modules/
+            static: {
+                directory: path.resolve(__dirname, "www")
             }
         }
     };

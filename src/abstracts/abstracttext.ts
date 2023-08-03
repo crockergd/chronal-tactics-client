@@ -58,7 +58,7 @@ export default class AbstractText {
     }
 
     get font_size(): number {
-        return parseInt(this.framework_object.style.fontSize) / this.renderer.base_scale_factor;
+        return this.framework_object.style.fontSize as number / this.renderer.base_scale_factor;
     }
 
     get text(): string {

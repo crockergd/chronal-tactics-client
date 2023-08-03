@@ -6,7 +6,7 @@ import * as Constants from './utils/constants';
     const dpr: number = window.devicePixelRatio;
 
     const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO, 
+        type: Phaser.AUTO,
         disableContextMenu: true,
         render: {
             pixelArt: true,
@@ -14,8 +14,10 @@ import * as Constants from './utils/constants';
         },
         scale: {
             mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
             width: '100%',
-            height: '100%'
+            height: '100%',
+            autoRound: true
         }
     };
 
