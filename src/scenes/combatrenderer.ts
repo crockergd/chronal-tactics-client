@@ -203,7 +203,7 @@ export default class CombatRenderer {
 
         const blue_name_text: AbstractText = this.render_context.add_text(this.render_context.buffer_sm, this.render_context.buffer_sm, is_blue ? this.settings.name : this.settings.opponent);
         blue_name_text.set_font_size(title_size);
-        blue_name_text.set_max_width(this.render_context.literal(180));
+        // blue_name_text.set_max_width(this.render_context.literal(180));
         blue_name_text.affix_ui();
         const blue_team_text: AbstractText = this.render_context.add_text(blue_name_text.x, blue_name_text.y + blue_name_text.height, is_blue ? 'YOU' : 'OPPONENT');
         blue_team_text.set_font_size(subtitle_size);
