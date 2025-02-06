@@ -44,13 +44,15 @@ export default class Boot extends AbstractScene {
 
         this.register_animations();
 
-        const adjectives: Array<string> = this.cache.json.get('adjectives').adjectives;
-        const firstnames: Array<string> = this.cache.json.get('firstnames').firstnames;
+        const character_limit: number = 9;
+
+        const adjectives: Array<string> = this.cache.json.get('adjectives').adjectives.filter(adjective => adjective.length <= character_limit);
+        const firstnames: Array<string> = this.cache.json.get('firstnames').firstnames.filter(firstname => firstname.length <= character_limit);
 
         const adjective: string = adjectives[MathExtensions.rand_int_inclusive(0, adjectives.length - 1)];
         const firstname: string = firstnames[MathExtensions.rand_int_inclusive(0, firstnames.length - 1)];
 
-        this.settings.name = (adjective.charAt(0).toUpperCase() + adjective.slice(1)) + ' ' + firstname;
+        this.settings.name = adjective + ' ' + firstname;
 
         this.start('lobby', {
             scene_context: this.scene_context
