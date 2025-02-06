@@ -7,8 +7,8 @@ import AbstractGroup from '../abstracts/abstractgroup';
 import * as Constants from '../utils/constants';
 import MathExtensions from '../utils/mathextensions';
 import AbstractButton from '../abstracts/abstractbutton';
-import AbstractContainer from '../abstracts/abstractcontainer';
 import { AbstractCollectionType } from '../abstracts/abstractcollectiontype';
+import TextType from '../ui/texttype';
 
 export default class RenderContext {
     public scene: AbstractScene;
@@ -49,7 +49,7 @@ export default class RenderContext {
     }
 
     public get base_scale_factor(): number {
-        return (Math.min((this.width / this.baseline_x), (this.height / this.baseline_y)));
+        return 1; //(Math.min((this.width / this.baseline_x), (this.height / this.baseline_y)));
     }
 
     public get outer_scale_factor(): number {
@@ -100,6 +100,10 @@ export default class RenderContext {
         return literal * this.base_scale_factor;
     }
 
+    public spatial(value: number): number {
+        return Math.ceil(value);
+    }
+
     public render_effect(effect_key: string, position: Vector, callback?: Function, context?: any): void {
         const sprite: AbstractSprite = this.add_sprite(position.x, position.y, effect_key);
         // sprite.set_anchor(0.5, 1);
@@ -111,16 +115,12 @@ export default class RenderContext {
         });
     }
 
-    public add_group(group?: AbstractGroup): AbstractGroup {
-        const group_object: AbstractGroup = new AbstractGroup(this, this.scene, group);
+    public add_group(collection?: AbstractGroup, scene_override?: AbstractScene): AbstractGroup {
+        const scene: AbstractScene = scene_override ?? this.scene;
+
+        const group_object: AbstractGroup = new AbstractGroup(this, scene, collection);
 
         return group_object;
-    }
-
-    public add_container(x?: number, y?: number): AbstractContainer {
-        const container_object: AbstractContainer = new AbstractContainer(this, this.scene, x, y);
-
-        return container_object;
     }
 
     public add_sprite(x: number, y: number, key: string, collection?: AbstractCollectionType, preserve?: boolean): AbstractSprite {
@@ -151,7 +151,7 @@ export default class RenderContext {
     public set_notification_position(position: Vector): void {
         this.notification_position = new Vector(position.x, position.y);
         this.notification_text = this.add_text(this.notification_position.x, this.notification_position.y, '');
-        this.notification_text.set_font_size(10);
+        this.notification_text.set_font_type(TextType.DEFAULT_SM);
         this.notification_text.set_anchor(0.5, 0);
         this.notification_text.set_word_wrap((this.width * 0.7) / this.base_scale_factor);
         this.notification_text.set_depth(position.z);

@@ -1,9 +1,10 @@
 import { io } from 'socket.io-client';
-import AbstractScene from '../abstracts/abstractscene';
-import AbstractText from '../abstracts/abstracttext';
-import AbstractSprite from '../abstracts/abstractsprite';
 import AbstractButton from '../abstracts/abstractbutton';
+import AbstractScene from '../abstracts/abstractscene';
+import AbstractSprite from '../abstracts/abstractsprite';
+import AbstractText from '../abstracts/abstracttext';
 import * as Constants from '../utils/constants';
+import TextType from '../ui/texttype';
 
 enum LobbyState {
     IDLE,
@@ -29,26 +30,22 @@ export default class Lobby extends AbstractScene {
         const bg: AbstractSprite = this.render_context.add_sprite(0, 0, 'gradient', null, true);
 
         this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
-        this.title.framework_object.setAlign('center');
-        this.title.set_font_size(48);
+        this.title.set_font_type(TextType.DEFAULT_LG);
         this.title.set_anchor(0.5, 0.5);
 
         this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
         this.subtitle.set_anchor(1, 0);
 
         this.footer = this.render_context.add_text(this.render_context.center_x, this.render_context.height - this.render_context.buffer, '');
-        this.footer.set_font_size(16);
         this.footer.set_anchor(0.5, 1);
 
         this.name = this.render_context.add_text(this.render_context.buffer, this.render_context.buffer, this.settings.name);
-        this.name.set_font_size(16);
 
         const connect_btn: AbstractButton = this.render_context.add_button(this.footer.x, this.footer.y, 'generic_btn', 'Play');
-        connect_btn.set_position((connect_btn.width / 2) + (this.render_context.buffer * 2), -(connect_btn.height * 2), true);
-        connect_btn.center();
+        connect_btn.set_position(this.render_context.buffer * 2, -(connect_btn.height * 2), true);
+
         const training_btn: AbstractButton = this.render_context.add_button(this.footer.x, this.footer.y, 'generic_btn', 'Training');
-        training_btn.set_position(-((connect_btn.width / 2) + (this.render_context.buffer * 2)), -(connect_btn.height * 2), true);
-        training_btn.center();
+        training_btn.set_position(-(connect_btn.width + (this.render_context.buffer * 2)), -(connect_btn.height * 2), true);
 
         connect_btn.on('pointerup', () => {
             if (this.state === LobbyState.IDLE) {

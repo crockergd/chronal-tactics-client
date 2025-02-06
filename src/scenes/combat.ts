@@ -4,6 +4,7 @@ import AbstractScene from '../abstracts/abstractscene';
 import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
 import CombatRenderer from './combatrenderer';
+import * as Constants from '../utils/constants';
 
 enum CombatState {
     CREATED,
@@ -220,7 +221,7 @@ export default class Combat extends AbstractScene {
                 return;
             }
 
-            if (this.stage.get_entity_by_position(local_pos)) {  
+            if (this.stage.get_entity_by_position(local_pos)) {
                 this.scene_renderer.deploy_unit.set_visible(false);
                 return;
             }
@@ -256,7 +257,7 @@ export default class Combat extends AbstractScene {
             this.clear_deployment();
         });
 
-        this.scene_renderer.ready_btn.once('pointerup', () => {
+        this.scene_renderer.ready_btn.once(Constants.TAP_EVENT, () => {
             this.change_state(CombatState.DEPLOYMENT_COMPLETE);
             this.ready_packet();
         }, this);
@@ -333,7 +334,7 @@ export default class Combat extends AbstractScene {
                 this.movement_entity.set('facing_sprite', null);
             }
 
-            const facing_sprite: AbstractSprite = this.render_context.add_sprite(this.movement_entity.get('sprite').x, this.movement_entity.get('sprite').y, 'directional_ring');
+            const facing_sprite: AbstractSprite = this.render_context.add_sprite(this.movement_entity.get('sprite').framework_object.x, this.movement_entity.get('sprite').framework_object.y, 'directional_ring');
             facing_sprite.set_scale(this.scene_renderer.unit_scalar, this.scene_renderer.unit_scalar);
             facing_sprite.set_anchor(0.5, 0.4);
             facing_sprite.set_depth(this.scene_renderer.facing_depth);

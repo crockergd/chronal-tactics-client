@@ -1,7 +1,7 @@
 {
     "name": "chronal-tactics-client",
     "version": "0.0.4",
-    "author": "George Crocker <g.crocker3@gmail.com>",
+    "author": "George Crocker <crockergd@outlook.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/crockergd/chronal-tactics-client.git"
@@ -17,25 +17,25 @@
         "cordova-plugin-screen-orientation": "^3.0.3",
         "cordova-plugin-whitelist": "^1.3.5",
         "es6-promise-plugin": "^4.2.2",
-        "phaser": "^3.60.0",
+        "phaser": "4.0.0-beta.5",
         "socket.io-client": "^4.7.2",
         "turn-based-combat-framework": "^0.0.3"
     },
     "devDependencies": {
-        "@types/node": "^20.4.6",
-        "@types/webpack": "^5.28.1",
-        "@types/webpack-env": "^1.18.1",
-        "clean-webpack-plugin": "^4.0.0",
+        "@types/node": "22.13.1",
+        "@types/webpack": "5.28.5",
+        "@types/webpack-env": "1.18.8",
         "cordova-android": "^12.0.0",
-        "css-loader": "^6.8.1",
-        "html-webpack-plugin": "^5.5.3",
-        "style-loader": "^3.3.3",
-        "terser-webpack-plugin": "^5.3.9",
-        "ts-loader": "^9.4.4",
-        "typescript": "^5.1.6",
-        "webpack": "^5.88.2",
-        "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^4.15.1"
+        "clean-webpack-plugin": "4.0.0",
+        "css-loader": "7.1.2",
+        "html-webpack-plugin": "5.6.3",
+        "style-loader": "4.0.0",
+        "terser-webpack-plugin": "5.3.11",
+        "ts-loader": "9.5.2",
+        "typescript": "5.7.3",
+        "webpack": "5.97.1",
+        "webpack-cli": "6.0.1",
+        "webpack-dev-server": "5.2.0"
     },
     "cordova": {
         "plugins": {

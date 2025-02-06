@@ -1,46 +1,13 @@
-import RenderContext from '../contexts/rendercontext';
 import { GameObjects } from 'phaser';
-import AbstractScene from './abstractscene';
-import { AbstractCollectionType } from './abstractcollectiontype';
+import RenderContext from '../contexts/rendercontext';
+import AnimationConfig from '../utils/animationconfig';
 import * as Constants from '../utils/constants';
-import AbstractGroup from './abstractgroup';
-import Vector from '../utils/vector';
+import AbstractBaseType from './abstractbasetype';
+import { AbstractCollectionType } from './abstractcollectiontype';
+import AbstractScene from './abstractscene';
 
-export default class AbstractSprite {
-    private renderer: RenderContext;
-    private parent?: AbstractGroup;
-    private _frame: number;
+export default class AbstractSprite extends AbstractBaseType {
     public framework_object: GameObjects.Sprite;
-
-    get literals(): Array<GameObjects.GameObject> {
-        return [this.framework_object];
-    }
-
-    get x(): number {
-        const parent_adjust: number = this.parent ? this.parent.absolute_x : 0;
-        return this.absolute_x - parent_adjust;
-    }
-
-    get y(): number {
-        const parent_adjust: number = this.parent ? this.parent.absolute_y : 0;
-        return this.absolute_y - parent_adjust;
-    }
-
-    get position(): Vector {
-        return new Vector(this.x, this.y);
-    }
-
-    get absolute_x(): number {
-        return this.framework_object.x;
-    }
-
-    get absolute_y(): number {
-        return this.framework_object.y;
-    }
-
-    get visible(): boolean {
-        return this.framework_object.visible;
-    }
 
     get width(): number {
         return this.framework_object.displayWidth; // / this.renderer.DPR;
@@ -64,32 +31,37 @@ export default class AbstractSprite {
     }
 
     get frame(): number {
-        return this._frame;
+        return +this.framework_object.frame.name;
+    }
+
+    get cropped(): boolean {
+        return this.framework_object.isCropped;
     }
 
     constructor(renderer: RenderContext, scene: AbstractScene, x: number, y: number, key: string | any, collection?: AbstractCollectionType) {
-        this.renderer = renderer;
-        this._frame = 0;
+        super(renderer, x, y);
 
-        this.framework_object = scene.add.sprite(x, y, key);
+        const framework_object: GameObjects.Sprite = scene.add.sprite(0, 0, key);
+        this.set_framework_object(framework_object);
+
         this.set_anchor(0, 0);
 
         if (collection) {
             collection.add(this);
-        }
-    }
-
-    public set_position(x: number, y: number, relative: boolean = false): void {
-        if (relative) {
-            this.framework_object.setPosition(this.framework_object.x + x, this.framework_object.y + y);
         } else {
-            this.framework_object.setPosition(x, y);
+            this.update_position();
         }
     }
 
-    public set_scale(x: number, y: number): void {
-        this.framework_object.scaleX *= x;
-        this.framework_object.scaleY *= y;
+    public set_scale(x: number, y: number, relative: boolean = true): void {
+        if (relative) {
+            this.framework_object.scaleX *= x;
+            this.framework_object.scaleY *= y;
+
+        } else {
+            this.framework_object.scaleX = this.renderer.base_scale_factor * x;
+            this.framework_object.scaleY = this.renderer.base_scale_factor * y;
+        }
     }
 
     public set_rotation(degrees: number): void {
@@ -97,108 +69,111 @@ export default class AbstractSprite {
         this.framework_object.setRotation(radians);
     }
 
-    public set_anchor(x: number, y: number): void {
-        this.framework_object.setOrigin(x, y);
-    }
-
     public set_frame(frame: number): void {
-        if (this._frame === frame) return;
+        if (frame < 0) {
+            frame = (this.framework_object.texture.frameTotal - 1) + frame;
+        }
+
         this.framework_object.setFrame(frame);
-        this._frame = frame;
-    }
-
-    public set_visible(visible: boolean): void {
-        if (this.framework_object.visible === visible) return;
-
-        this.framework_object.visible = visible;
-    }
-
-    public set_alpha(alpha: number): void {
-        this.framework_object.alpha = alpha;
-    }
-
-    public set_scroll(scroll_x: number, scroll_y: number): void {
-        this.framework_object.setScrollFactor(scroll_x, scroll_y);
-    }
-
-    public set_depth(depth: number): void {
-        if (this.framework_object.depth > depth) return;
-        this.framework_object.setDepth(depth);
     }
 
     public set_angle(angle: number): void {
         this.framework_object.setAngle(angle);
     }
 
-    public set_parent(parent: AbstractGroup): void {
-        this.parent = parent;
-    }
-
-    public affix_ui(): void {
-        this.set_scroll(0, 0);
-    }
-
     public flag_cachable(): void {
         this.framework_object.ignoreDestroy = true;
     }
 
-    public crop(x: number, y: number, width: number, height: number): void {
+    public crop(x?: number, y?: number, width?: number, height?: number): void {
+        if (!x && !y && !width && !height) {
+            this.framework_object.setCrop();
+            return;
+        }
+
         // FIREFOX can't handle crops with a value of 0, for web testing
         if (this.renderer.scene.game.device.browser.firefox) {
             if (width === 0) width = 1;
             if (height === 0) height = 1;
         }
+
+        if (x) {
+            width -= x;
+        }
         this.framework_object.setCrop(x, y, width, height);
     }
 
-    public flip_x(): void {
-        this.framework_object.flipX = !this.framework_object.flipX;
+    public flip_x(override?: boolean): void {
+        if (override || override === false) this.framework_object.flipX = override;
+        else this.framework_object.flipX = !this.framework_object.flipX;
     }
 
     public flip_y(): void {
         this.framework_object.flipY = !this.framework_object.flipY;
     }
 
-    public on(key: string, callback: Function, context?: any, ...args: Array<any>): string {
-        return this.renderer.bind_event(this.framework_object, key, callback, context, ...args);
+    public has_event(key: string): boolean {
+        if (key === Constants.TAP_EVENT) key = Constants.UP_EVENT;
+
+        return this.framework_object.listenerCount(key) > 0;
     }
 
-    public once(key: string, callback: Function, context?: any, ...args: Array<any>): string {
-        if (key === Constants.TAP_EVENT) this.framework_object.setInteractive();
-        let event_key: string = key;
+    public is_playing(key?: string): boolean {
+        if (!this.framework_object) return false;
+        if (!key) return this.framework_object.anims.isPlaying;
+        if (!this.framework_object.anims.isPlaying) return false;
+        if (!this.framework_object.anims.currentAnim) return false;
 
-        if (args && args.length) {
-            event_key += Constants.EVENT_RECAST;
-            this.framework_object.once(key, () => {
-                this.framework_object.emit(event_key, ...args);
-            });
-            this.framework_object.once(event_key, callback, context);
-        } else {
-            this.framework_object.once(event_key, callback, context);
-        }
-
-        return event_key;
+        return this.framework_object.anims.currentAnim.key === key;
     }
 
-    public off(key?: string): void {
-        if (key) {
-            this.framework_object.removeAllListeners(key);
-            this.framework_object.removeAllListeners(key + Constants.EVENT_RECAST);
-        } else {
-            this.framework_object.removeAllListeners();
-        }
-    }
-
-    public play(key: string): void {
+    public play(key: string, config?: AnimationConfig): void {
         if (!this.framework_object) return;
 
-        this.framework_object.play(key);
+        const phaser_config: Phaser.Types.Animations.PlayAnimationConfig = {
+            key: key,
+            timeScale: config?.anim_scale ?? 1,
+            startFrame: config?.start_frame ?? 0
+        };
+
+        if (config?.reverse) {
+            this.framework_object.playReverse(phaser_config);
+        } else {
+            this.framework_object.play(phaser_config);
+        }
+
+        if (config?.on_complete) {
+            this.framework_object.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + key, () => {
+                config.on_complete.call();
+            }, this);
+        }
     }
 
-    public destroy(): void {
-        if (this.framework_object) {
-            this.framework_object.destroy();
-            this.framework_object = null;
+    public pause(): void {
+        if (!this.framework_object) return;
+
+        this.framework_object.anims.currentAnim.pause();
+    }
+
+    public resume(): void {
+        if (!this.framework_object) return;
+
+        this.framework_object.anims.currentAnim.resume();
+    }
+
+    public stop(on?: number): void {
+        if (on) {
+            const current: Phaser.Animations.Animation = this.framework_object.anims.currentAnim;
+            if (!current) {
+                this.framework_object.stop();
+
+            } else {
+                const frame: Phaser.Animations.AnimationFrame = current.frames[on];
+                this.framework_object.stopOnFrame(frame);
+            }
+
+        } else {
+            this.framework_object.stop();
         }
     }
 }

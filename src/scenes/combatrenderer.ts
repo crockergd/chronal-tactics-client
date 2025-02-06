@@ -1,13 +1,12 @@
+import { Attack, Death, Entity, Face, Move, Resoluble, Vector } from 'turn-based-combat-framework';
+import AbstractButton from '../abstracts/abstractbutton';
+import AbstractGroup from '../abstracts/abstractgroup';
+import AbstractSprite from '../abstracts/abstractsprite';
+import AbstractText from '../abstracts/abstracttext';
 import RenderContext from '../contexts/rendercontext';
 import Stage from '../stages/stage';
-import { Vector, Resoluble, Face, Move, Attack, Death, Entity } from 'turn-based-combat-framework';
-import AbstractText from '../abstracts/abstracttext';
 import ClientSettings from '../utils/clientsettings';
-import AbstractSprite from '../abstracts/abstractsprite';
-import { AbstractType } from '../abstracts/abstracttype';
-import AbstractGroup from '../abstracts/abstractgroup';
-import AbstractButton from '../abstracts/abstractbutton';
-import AbstractContainer from '../abstracts/abstractcontainer';
+import TextType from '../ui/texttype';
 
 export default class CombatRenderer {
     public container: AbstractGroup;
@@ -16,7 +15,7 @@ export default class CombatRenderer {
 
     public unit_frame_pos: Vector;
     public unit_frame: AbstractSprite;
-    public unit_ui: AbstractContainer;
+    public unit_ui: AbstractGroup;
     public deploy_ui: AbstractGroup;
     public deploy_unit: AbstractSprite;
     public deploy_classes: Array<AbstractSprite>;
@@ -188,7 +187,6 @@ export default class CombatRenderer {
         text.framework_object.setLineSpacing(0);
         text.affix_ui();
         text.set_depth(100);
-        text.framework_object.setAlign('center');
     }
 
     public render_team_ui(): void {
@@ -206,7 +204,7 @@ export default class CombatRenderer {
         // blue_name_text.set_max_width(this.render_context.literal(180));
         blue_name_text.affix_ui();
         const blue_team_text: AbstractText = this.render_context.add_text(blue_name_text.x, blue_name_text.y + blue_name_text.height, is_blue ? 'YOU' : 'OPPONENT');
-        blue_team_text.set_font_size(subtitle_size);
+        blue_team_text.set_font_type(TextType.DEFAULT_SM);
         blue_team_text.affix_ui();
 
         const red_banner: AbstractSprite = this.render_context.add_sprite(this.render_context.width, 0, 'red_banner');
@@ -220,7 +218,7 @@ export default class CombatRenderer {
         red_name_text.set_anchor(1, 0);
         red_name_text.affix_ui();
         const red_team_text: AbstractText = this.render_context.add_text(red_name_text.x, red_name_text.y + red_name_text.height, is_blue ? 'OPPONENT' : 'YOU');
-        red_team_text.set_font_size(subtitle_size);
+        red_team_text.set_font_type(TextType.DEFAULT_SM);
         red_team_text.set_anchor(1, 0);
         red_team_text.affix_ui();
 
@@ -228,7 +226,7 @@ export default class CombatRenderer {
     }
 
     public render_deployment_ui(deployment_tiles: Array<Vector>): void {
-        this.unit_ui = this.render_context.add_container();
+        this.unit_ui = this.render_context.add_group();
         this.unit_ui.set_depth(this.overlay_depth);
         this.deploy_ui = this.render_context.add_group();
 
@@ -244,7 +242,7 @@ export default class CombatRenderer {
 
         let index: number = 0;
         for (const class_key of class_keys) {
-            const sprite: AbstractSprite = this.render_context.add_sprite(this.unit_frame.x, this.unit_frame.y - (this.unit_frame.height / 2), class_key, this.unit_ui);
+            const sprite: AbstractSprite = this.render_context.add_sprite(this.unit_frame.group_x, this.unit_frame.group_y - (this.unit_frame.height / 2), class_key, this.unit_ui);
             sprite.set_frame(this.settings.team === 0 ? 0 : 3);
             sprite.set_scale(this.unit_scalar, this.unit_scalar);
             sprite.set_anchor(1, 0.5);
@@ -257,23 +255,22 @@ export default class CombatRenderer {
         }
 
         this.ready_stat_text = this.render_context.add_text(this.render_context.center_x, this.render_context.buffer_sm, '', this.deploy_ui);
-        this.ready_stat_text.set_font_size(14);
+        this.ready_stat_text.set_font_type(TextType.DEFAULT_SM);
         this.ready_stat_text.affix_ui();
         this.ready_stat_text.set_anchor(0.5, 0);
         this.ready_stat_text.set_depth(this.overlay_depth);
 
         this.deploy_stat_text = this.render_context.add_text(this.ready_stat_text.x, this.ready_stat_text.y + this.ready_stat_text.height, '', this.deploy_ui);
-        this.deploy_stat_text.set_font_size(14);
+        this.deploy_stat_text.set_font_type(TextType.DEFAULT_SM);
         this.deploy_stat_text.affix_ui();
         this.deploy_stat_text.set_anchor(0.5, 0);
         this.deploy_stat_text.set_depth(this.overlay_depth);
 
-        this.ready_btn = this.render_context.add_button(this.render_context.center_x, this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 2), 'generic_btn', 'Ready', this.deploy_ui);
-        // this.ready_btn.set_scale(2, 2);
+        this.ready_btn = this.render_context.add_button(0, 0, 'generic_btn', 'Ready', this.deploy_ui);
+        this.ready_btn.set_position(this.render_context.center_x - (this.ready_btn.width / 2), this.deploy_stat_text.y + (this.deploy_stat_text.height * 2) + (this.render_context.buffer * 2));
         this.ready_btn.affix_ui();
         this.ready_btn.set_visible(false);
         this.ready_btn.set_depth(this.overlay_depth);
-        this.ready_btn.center();
 
         for (const deployment_tile of deployment_tiles) {
             const world: Vector = this.local_to_world(deployment_tile);
@@ -318,6 +315,8 @@ export default class CombatRenderer {
             this.deploy_unit.destroy();
             this.deploy_unit = null;
         }
+
+        this.deploy_ui.clean();
         this.deploy_unit = this.render_context.add_sprite(0, 0, deployment_class, this.deploy_ui);
         this.deploy_unit.set_scale(this.unit_scalar, this.unit_scalar);
         this.deploy_unit.set_anchor(0.5, 1);
@@ -378,7 +377,6 @@ export default class CombatRenderer {
         title.set_anchor(0.5, 0.5);
         title.affix_ui();
         title.set_depth(this.overlay_depth);
-        title.set_stroke(8 / this.render_context.DPR);
 
         const subtitle: AbstractText = this.render_context.add_text(this.render_context.center_x, title.y + title.height, completed_string);
         subtitle.set_anchor(0.5, 0.5);

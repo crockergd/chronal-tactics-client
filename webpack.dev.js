@@ -38,7 +38,7 @@ module.exports = (env) => {
                     include: [
                         path.resolve(__dirname, 'assets/images'),
                         path.resolve(__dirname, 'assets/tilesheets'),
-                        path.resolve(__dirname, 'assets/bitmap')
+                        path.resolve(__dirname, 'assets/bitmaps')
                     ]
                 },
                 {
@@ -79,7 +79,8 @@ module.exports = (env) => {
             }),
 
             new webpack.DefinePlugin({
-                "typeof PLUGIN_FBINSTANT": JSON.stringify(false)
+                "typeof PLUGIN_FBINSTANT": JSON.stringify(false),
+                BUILD_PRODUCTION: JSON.stringify(false)
             })
         ],
 
@@ -93,4 +94,4 @@ module.exports = (env) => {
     };
 
     return config;
-}
+};

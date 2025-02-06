@@ -1,25 +1,18 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "lib": [
-            "dom",
-            "es2017",
-            "scripthost"
-        ],
+        "target": "ES2016",
+        "module": "Preserve",
         "sourceMap": true,
-        "moduleResolution": "node",
-        "isolatedModules": false,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "preserveConstEnums": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "noImplicitOverride": false,
         "esModuleInterop": true,
+        "removeComments": true,
         "outDir": "./www"
     },
     "include": [
         "src/**/*.ts",
         "typings/*.d.ts"
-    ],
-    "exclude": [
-        "node_modules"
     ]
 }

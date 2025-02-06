@@ -12,12 +12,16 @@ import * as Constants from './utils/constants';
             pixelArt: true,
             transparent: false
         },
+        // scale: {
+        //     mode: Phaser.Scale.FIT,
+        //     width: '100%',
+        //     height: '100%'
+        // }
         scale: {
             mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-            width: '100%',
-            height: '100%',
-            autoRound: true
+            width: 640,
+            height: 360,
+            autoCenter: Phaser.Scale.CENTER_BOTH
         }
     };
 

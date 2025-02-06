@@ -1,11 +1,12 @@
 import AbstractScene from '../abstracts/abstractscene';
+import AbstractSprite from '../abstracts/abstractsprite';
 import AbstractText from '../abstracts/abstracttext';
-import MathExtensions from '../utils/mathextensions';
 import SceneContext from '../contexts/scenecontext';
-import Lobby from './lobby';
-import Combat from './combat';
 import CanvasExtensions from '../utils/canvasextensions';
 import Color from '../utils/color';
+import MathExtensions from '../utils/mathextensions';
+import Combat from './combat';
+import Lobby from './lobby';
 
 export default class Boot extends AbstractScene {
     private title: AbstractText;
@@ -17,20 +18,22 @@ export default class Boot extends AbstractScene {
     public preload(): void {
         this.scene_context = new SceneContext(this);
 
-        this.game.scale.setGameSize(this.render_context.width * this.render_context.DPR, this.render_context.height * this.render_context.DPR);
+        // this.game.scale.setGameSize(this.render_context.width * this.render_context.DPR, this.render_context.height * this.render_context.DPR);
 
-        this.title = this.render_context.add_text(this.render_context.center_x, this.render_context.center_y - this.render_context.height / 16, 'Chronal Tactics');
-        this.title.framework_object.setAlign('center');
-        this.title.set_font_size(48);
-        this.title.set_stroke(8 / this.render_context.DPR);
-        this.title.set_anchor(0.5, 0.5);
+        const require_image: __WebpackModuleApi.RequireContext = require.context('../../assets/images/', true);
+        this.load.image('radbee_logo', require_image('./radbee_logo.png')).once('filecomplete-image-radbee_logo', () => {
+            const offset_y: number = this.render_context.literal(10);
 
-        this.subtitle = this.render_context.add_text(this.cameras.main.width - this.render_context.buffer, this.render_context.buffer, '');
-        this.subtitle.set_anchor(1, 0);
+            const logo: AbstractSprite = this.render_context.add_sprite(this.render_context.center_x, this.render_context.center_y - offset_y, 'radbee_logo');
+            logo.set_anchor(0.5, 0.5);
+            logo.set_alpha(0);
 
-        this.load.on('progress', (percentage: number) => {
-            this.subtitle.text = Math.floor(percentage * 100) + '%';
-        });
+            this.tweens.add({
+                targets: [logo.framework_object],
+                alpha: 1,
+                duration: 200
+            });
+        }, this);
 
         this.load_states();
         this.load_assets();
@@ -60,9 +63,14 @@ export default class Boot extends AbstractScene {
     }
 
     private load_assets(): void {
+        const require_bitmap: __WebpackModuleApi.RequireContext = require.context('../../assets/bitmaps/', true);
         const require_image: __WebpackModuleApi.RequireContext = require.context('../../assets/images/', true);
         const require_tilesheet: __WebpackModuleApi.RequireContext = require.context('../../assets/tilesheets/', true);
         const require_json: __WebpackModuleApi.RequireContext = require.context('../../assets/json/', true);
+
+        this.load.bitmapFont('silkscreen', require_bitmap('./silkscreen_0.png'), require_bitmap('./silkscreen.fnt'));
+        this.load.bitmapFont('silkscreen_lg', require_bitmap('./silkscreen_lg_0.png'), require_bitmap('./silkscreen_lg.fnt'));
+        this.load.bitmapFont('silkscreen_sm', require_bitmap('./silkscreen_sm_0.png'), require_bitmap('./silkscreen_sm.fnt'));
 
         this.load.spritesheet('sword_unit', require_tilesheet('./sword_unit.png'), { frameWidth: 20, frameHeight: 30 });
         this.load.spritesheet('spear_unit', require_tilesheet('./spear_unit.png'), { frameWidth: 20, frameHeight: 30 });

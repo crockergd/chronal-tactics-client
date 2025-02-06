@@ -38,7 +38,7 @@ module.exports = (env) => {
                     include: [
                         path.resolve(__dirname, 'assets/images'),
                         path.resolve(__dirname, 'assets/tilesheets'),
-                        path.resolve(__dirname, 'assets/bitmap')
+                        path.resolve(__dirname, 'assets/bitmaps')
                     ]
                 },
                 {
