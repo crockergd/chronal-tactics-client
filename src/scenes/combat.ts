@@ -1,10 +1,9 @@
 import { Entity, Vector } from 'turn-based-combat-framework';
-import Stage from '../stages/stage';
 import AbstractScene from '../abstracts/abstractscene';
-import AbstractText from '../abstracts/abstracttext';
 import AbstractSprite from '../abstracts/abstractsprite';
-import CombatRenderer from './combatrenderer';
+import Stage from '../stages/stage';
 import * as Constants from '../utils/constants';
+import CombatRenderer from './combatrenderer';
 
 enum CombatState {
     CREATED,
@@ -72,6 +71,12 @@ export default class Combat extends AbstractScene {
             this.movement_y = pointer.y;
         });
 
+        this.bind_network();
+
+        this.ready_packet();
+    }
+
+    public bind_network(): void {
         this.socket.on('deployment-started', (payload: any) => {
             if (this.state !== CombatState.CREATED) return;
             this.change_state(CombatState.DEPLOYMENT_STARTED);
@@ -117,10 +122,7 @@ export default class Combat extends AbstractScene {
             this.stage.battle.deserialize_turn(turn_json);
 
             for (const entity of this.stage.entities) {
-                if (entity.get('facing_sprite')) {
-                    entity.get('facing_sprite').destroy();
-                    entity.set('facing_sprite', null);
-                }
+                (entity.get('directional_ring') as AbstractSprite).set_visible(false);
             }
 
             this.scene_renderer.render_turn(this.stage.battle.get_last_turn());
@@ -129,8 +131,6 @@ export default class Combat extends AbstractScene {
             this.interval = payload.interval;
             this.timer = this.interval;
         });
-
-        this.ready_packet();
     }
 
     public update(time: number, dt_ms: number): void {
@@ -299,6 +299,7 @@ export default class Combat extends AbstractScene {
 
             for (const entity of this.stage.entities) {
                 if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.render_context.camera).length) {
+                    if (entity.identifier.team !== this.team) continue;
                     this.movement_entity = entity;
                     return;
                 }
@@ -329,27 +330,18 @@ export default class Combat extends AbstractScene {
                 facing.y = -1;
             }
 
-            if (this.movement_entity.get('facing_sprite')) {
-                this.movement_entity.get('facing_sprite').destroy();
-                this.movement_entity.set('facing_sprite', null);
-            }
-
-            const facing_sprite: AbstractSprite = this.render_context.add_sprite(this.movement_entity.get('sprite').framework_object.x, this.movement_entity.get('sprite').framework_object.y, 'directional_ring');
-            facing_sprite.set_scale(this.scene_renderer.unit_scalar, this.scene_renderer.unit_scalar);
-            facing_sprite.set_anchor(0.5, 0.4);
-            facing_sprite.set_depth(this.scene_renderer.facing_depth);
-
+            const directional_ring: AbstractSprite = this.movement_entity.get('directional_ring') as AbstractSprite;
+            directional_ring.set_visible(true);
+            directional_ring.set_depth(this.scene_renderer.facing_depth);
             if (facing.x > 0 && facing.y > 0) {
-                facing_sprite.set_frame(1);
+                directional_ring.set_frame(1);
             } else if (facing.x > 0 && facing.y < 0) {
-                facing_sprite.set_frame(3);
+                directional_ring.set_frame(3);
             } else if (facing.x < 0 && facing.y > 0) {
-                facing_sprite.set_frame(0);
+                directional_ring.set_frame(0);
             } else if (facing.x < 0 && facing.y < 0) {
-                facing_sprite.set_frame(2);
+                directional_ring.set_frame(2);
             }
-
-            this.movement_entity.set('facing_sprite', facing_sprite);
 
             this.fire_resoluble('Face', this.movement_entity, facing);
             this.fire_resoluble('Move', this.movement_entity);

@@ -76,10 +76,9 @@ export default class CombatRenderer {
         for (const resoluble of movements) {
             const position: Vector = this.local_to_world(resoluble.source.spatial.position);
             position.y += this.entity_adjust_y;
-            // resoluble.source.get('sprite').set_position(position.x, position.y);
 
             this.render_context.scene.tweens.add({
-                targets: resoluble.source.get('sprite').framework_object,
+                targets: resoluble.source.get('group'),
                 x: position.x,
                 y: position.y,
                 duration: 300,
@@ -164,12 +163,23 @@ export default class CombatRenderer {
             const position: Vector = this.local_to_world(entity.spatial.position);
             position.y += this.entity_adjust_y;
 
-            entity.set('sprite', this.render_context.add_sprite(position.x, position.y, entity.identifier.class_key), false);
-            entity.get('sprite').set_anchor(0.5, 1.0);
-            entity.get('sprite').framework_object.setInteractive();
-            entity.get('sprite').set_depth(this.unit_depth);
+            entity.set('group', this.render_context.add_group(), false);
+            entity.set('sprite', this.render_context.add_sprite(0, 0, entity.identifier.class_key, entity.get('group')), false);
+            entity.set('directional_ring', this.render_context.add_sprite(0, 0, 'directional_ring', entity.get('group')), false);
+
+            (entity.get('sprite') as AbstractSprite).set_scale(this.unit_scalar, this.unit_scalar);
+            (entity.get('sprite') as AbstractSprite).set_anchor(0.5, 1.0);
+            (entity.get('sprite') as AbstractSprite).set_depth(this.unit_depth);
+            (entity.get('sprite') as AbstractSprite).framework_object.setInteractive();
+
+            (entity.get('directional_ring') as AbstractSprite).set_scale(this.unit_scalar, this.unit_scalar);
+            (entity.get('directional_ring') as AbstractSprite).set_anchor(0.5, 0.4);
+            (entity.get('directional_ring') as AbstractSprite).set_visible(false);
+
+            (entity.get('group') as AbstractGroup).set_position(position.x, position.y);
+
             entity.set('dirty', true);
-            entity.get('sprite').set_scale(this.unit_scalar, this.unit_scalar);
+
             this.update_entity_facing(entity);
         }
     }

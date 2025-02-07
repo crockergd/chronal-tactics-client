@@ -49,16 +49,18 @@ export default class Stage {
         if (this.battle) {
             for (const entity of this.battle.get_entities()) {
                 if (!entity) continue;
-                if (!entity.get('sprite')) continue;
+                if (!entity.get('group')) continue;
 
-                entity.get('sprite').destroy();
+                entity.get('group').destroy();
+                entity.set('group', null);
                 entity.set('sprite', null);
+                entity.set('directional_ring', null);
             }
         }
 
         this.battle = null;
     }
-    
+
     public toJSON(): any {
         const json: any = {
             battle: this.battle,
@@ -73,7 +75,7 @@ export default class Stage {
     public static fromJSON(json: any): Stage {
         const obj: Stage = new Stage(json.width, json.height, json.depth);
 
-        obj.battle = Battle.fromJSON(json.battle);        
+        obj.battle = Battle.fromJSON(json.battle);
 
         return obj;
     }
