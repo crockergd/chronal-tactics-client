@@ -280,11 +280,11 @@ export default class Combat extends AbstractScene {
     private begin_battle(): void {
         this.scene_renderer.destroy_deployment_ui();
 
-        this.input.removeAllListeners();
-        this.init_input();
-
         this.scene_renderer.render_entities(this.stage);
         this.scene_renderer.update_depth(this.stage.entities);
+
+        this.input.removeAllListeners();
+        this.init_input();
 
         const center_world: Vector = this.scene_renderer.local_to_world(this.stage.get_center());
         this.render_context.camera.pan(center_world.x, center_world.y);
@@ -293,13 +293,15 @@ export default class Combat extends AbstractScene {
     }
 
     private init_input(): void {
+        const friendly_entities: Array<Entity> = this.stage.entities.filter(entity => entity.identifier.team === this.team);
+
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             this.movement_x = pointer.x;
             this.movement_y = pointer.y;
 
-            for (const entity of this.stage.entities) {
-                if (this.game.input.hitTest(pointer, [entity.get('sprite').framework_object], this.render_context.camera).length) {
-                    if (entity.identifier.team !== this.team) continue;
+            for (const entity of friendly_entities) {
+                const sprite: AbstractSprite = entity.get('sprite');
+                if (this.game.input.hitTest(pointer, [sprite.framework_object], this.render_context.camera).length) {
                     this.movement_entity = entity;
                     return;
                 }
@@ -309,12 +311,10 @@ export default class Combat extends AbstractScene {
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
             if (!this.movement_entity) return;
             if (!this.movement_entity.alive) return;
-            if (Math.abs(pointer.x - this.movement_x) < 30) return;
-            if (Math.abs(pointer.y - this.movement_y) < 30) return;
-            if (this.movement_entity.identifier.team !== this.team) {
-                this.movement_entity = null;
-                return;
-            }
+
+            const deadzone: number = 10;
+            if (Math.abs(pointer.x - this.movement_x) < deadzone) return;
+            if (Math.abs(pointer.y - this.movement_y) < deadzone) return;
 
             const facing: Vector = new Vector(0, 0);
 
@@ -349,13 +349,13 @@ export default class Combat extends AbstractScene {
             this.movement_entity = null;
         }, this);
 
-        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-            if (!pointer.isDown) return;
-            if (this.movement_entity) return;
+        // this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        //     if (!pointer.isDown) return;
+        //     if (this.movement_entity) return;
 
-            this.movement_x = pointer.x;
-            this.movement_y = pointer.y;
-        }, this);
+        //     this.movement_x = pointer.x;
+        //     this.movement_y = pointer.y;
+        // }, this);
     }
 
     private change_state(state: CombatState): void {
