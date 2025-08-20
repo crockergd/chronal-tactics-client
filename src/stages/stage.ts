@@ -1,5 +1,5 @@
 import Cell from './cell';
-import { Battle, TickMode, Entity, Vector } from 'turn-based-combat-framework';
+import { Battle, Entity, Vector } from 'turn-based-combat-framework';
 
 export default class Stage {
     public battle: Battle;
@@ -15,7 +15,7 @@ export default class Stage {
     }
 
     constructor(width: number, height: number, depth: number) {
-        this.battle = new Battle(TickMode.SYNC);
+        this.battle = new Battle(2);
 
         this.width = width;
         this.height = height;
